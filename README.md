@@ -3,6 +3,6 @@ Easy Gantt provides a rich set of features for project planning and visualizatio
 
 Easy Gantt is a single page javascript/html code that run on any browser.
 
-Download the .html file and use it.
+Download the .html file and double click on it to run it.
 
 The .pdf file describe the main features of Easy Gantt.
