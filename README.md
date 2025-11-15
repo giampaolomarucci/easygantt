@@ -1,10 +1,10 @@
 # easygantt
-Easy Gantt provides a rich set of features for project planning and visualization directly within a web browser, without requiring any server-side processing. It focuses on user-friendliness and extensive customization options to tailor the Gantt chart to specific project needs and visual preferences.
+EasyGantt provides a rich set of features for project planning and visualization directly within a web browser, without requiring any server-side processing. It focuses on user-friendliness and extensive customization options to tailor the Gantt chart to specific project needs and visual preferences.
 
-Easy Gantt is a single page javascript/html code that run on any browser.
+EasyGantt is a single page javascript/html code that run on any browser.
 
 Download the .html file from my github easygantt repository and double click on it to run it on your local browser
 
 or
 
-click here to use the latest version on my github page: <a href = https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.txt.html> EasyGantt latest version </a>
+click here to use the latest version on my github page: [EasyGantt](https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.txt.html)
