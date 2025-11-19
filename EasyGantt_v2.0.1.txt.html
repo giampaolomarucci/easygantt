@@ -10,6 +10,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    #htmlScaleWrapper {
+      transform-origin: top left;
+      width: fit-content;
+    }
+    #svgContainer {
+      margin-top: 0px;   /* base gap BEFORE scaling */
+    } 
+    /* Styling for input text area */
     #ganttChart {
       border: 1px solid #ccc;
     }
@@ -24,12 +32,9 @@
       display: flex; 
       align-items: flex-start;
       font-size: 12px;
-      flex-wrap: wrap;              /* NEW: responsive */
-      gap: 10px;                    /* NEW: spacing for wrapping */
     }
     #inputArea textarea {
-      font-size: 10px;
-      width: 100%;                  /* NEW: responsive */ 
+      font-size: 10px; 
     }
     #inputArea button {
       font-size: 10px;
@@ -40,7 +45,7 @@
       font-size: 11px; 
     }
     #inputArea input[type="checkbox"] {
-      width: auto; /* Prevents checkbox from being too wide */
+      width: auto;
     }
     #tasksSelector {
       display: flex; 
@@ -57,17 +62,14 @@
       width: 72px;
       height: 72px;
     }
-
     /* Styling for the tab buttons */
     .tab-container {
         display: flex;
         flex-direction: column;
-        width: 100%;                   /* NEW */
     }
     .tab {
         display: flex;
         cursor: pointer;
-        flex-wrap: wrap;               /* NEW: responsive tab buttons */
     }
     .tab div {
         padding: 5px 10px;
@@ -93,19 +95,20 @@
         display: block;
         position: relative;
     }
-    /* Styling for input controls inside tabs */
+    
     #options {
       flex-direction: column;
     }
     #options label {
-      margin-left: 12px;
+      margin-left: 16px;
       font-size: 10px;
     }
-    /*#options input[type="number"]{
+    #options input[type="number"]{
       width: 40px;
       font-size: 10px; 
       padding: 1px;
     }
+
     #options select,
     #options input[type="checkbox"], 
     #options input[type="date"] {
@@ -115,18 +118,7 @@
     }
     #options input[type="checkbox"] {
       width: auto; 
-    }*/
-    #options input[type="number"],
-    #options input[type="date"],
-    #options select {
-      width: 75px;
-      font-size: 10px;
-      padding: 2px;
     }
-    #options input[type="checkbox"] {
-      width: auto;
-    }
-
     /* Styles for the Non-Working Dates popup */
     .popup-overlay {
         position: fixed;
@@ -173,6 +165,8 @@
 
 <div id="title">Easy Gantt - by Giampaolo Marucci</div>
 
+<div id="layoutWrapper">
+<div id="htmlScaleWrapper">
 <div id="inputArea">
   <div id="inputText">
     <label for="csvInput" title="Input field for tasks data"><b>Comma or tab separated values for each Task/Line:</b></label><br>
@@ -986,10 +980,28 @@
   </div> <!-- End <div class="tab-content-container"> -->
   </div> <!-- End <div class="tab-container"> -->
 </div> <!-- End <div id="inputArea"> -->
+</div> <!-- End <div id="htmlScaleWrapper"> -->
 
 <div id="svgContainer"></div>
+</div> <!-- End <div id="layoutWrapper"> -->
 
 <script>
+
+  function scaleHtmlControls() {
+    const baseWidth = 1300;  // your design width
+    const scaleFactor = window.innerWidth / baseWidth;
+    const wrapper = document.getElementById("htmlScaleWrapper");
+    wrapper.style.transform = "scale(" + scaleFactor + ")";
+    const unscaledHeight = wrapper.offsetHeight;
+    const scaledHeight = unscaledHeight * scaleFactor;
+    const gapRatio = 0.01; // 5% of height (change if needed)
+    const computedGap = scaledHeight * gapRatio;
+    const svgContainer = document.getElementById("svgContainer");
+    svgContainer.style.marginTop = computedGap + "px";
+  }
+  scaleHtmlControls(); // run once
+  window.addEventListener("resize", scaleHtmlControls); // update on window resize
+
   const svgNS = "http://www.w3.org/2000/svg";
 
   function openTab(event, tabId) {
