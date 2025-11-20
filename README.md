@@ -7,7 +7,4 @@ Download the .html file from my github easygantt repository and double click on 
 
 or
 
-click here to use the latest version on my github page
-web version: [EasyGantt web](https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.txt.html)
-
-responsive version: [EasyGantt responsive](https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.1.txt.html)
+click here to use the latest version on my github page: [EasyGantt web](https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.txt.html)
