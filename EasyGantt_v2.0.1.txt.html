@@ -10,13 +10,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    #htmlScaleWrapper {
+    #layoutWrapper {
       transform-origin: top left;
       width: fit-content;
+      height: fit-content;
     }
-    #svgContainer {
-      margin-top: 0px;   /* base gap BEFORE scaling */
-    } 
     /* Styling for input text area */
     #ganttChart {
       border: 1px solid #ccc;
@@ -204,7 +202,7 @@
     <!--</br><label for="editMode" title="Edit mode">Edit Mode</label>
     <input type="checkbox" id="editMode" onchange="generateGanttChart(event)">-->
 
-  </div>
+  </div> <!-- End <div id="inputText"> -->
 
   <div id="tasksSelector"></div>
 
@@ -219,7 +217,7 @@
     <div class="tab-button" onclick="openTab(event, 'tab7')">Delay</div>    
     <div class="tab-button" onclick="openTab(event, 'tab8')">Dates</div>
     <div class="tab-button" onclick="openTab(event, 'tab9')">Filters</div>
-  </div>
+  </div> <!-- End <div class="tab"> -->
 
   <div class="tab-content-container">
   <div id="tab1" class="tab-content active">
@@ -241,8 +239,8 @@
     <label for="percentCompleteMultiplier" title="Multiply Percent Complete by 100">Percent Complete *100:</label>
     <input type="checkbox" id="percentCompleteMultiplier" onclick="generateGanttChart(event)" />
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab1" class="tab-content active"> -->
 
   <div id="tab2" class="tab-content">
   <div id="options">
@@ -329,8 +327,8 @@
     <label for="headerDatesSpace" title="Horizontal spacing of dates in header, in pixels. Increasing the value some dates disappear">Dates Distance:</label>
     <input type="number" id="headerDatesSpace" value="60" onchange="generateGanttChart(event)"/>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab2" class="tab-content"> -->
   
   <div id="tab3" class="tab-content">
   <div id="options">
@@ -430,8 +428,8 @@
       <option value="4,4" selected>Dashed</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab3" class="tab-content"> -->
 
   <div id="tab4" class="tab-content">
   <div id="options">
@@ -554,8 +552,8 @@
       <option value="4,4">Dashed</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab4" class="tab-content"> -->
 
   <div id="tab5" class="tab-content">
   <div id="options">
@@ -669,8 +667,8 @@
     <label for="tasksDetailedInfo_2" title="Show detailed additional task information">Predecessors:</label>
     <input type="checkbox" id="tasksDetailedInfo_2" onclick="generateGanttChart(event)" />
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab5" class="tab-content"> -->
 
   <div id="tab6" class="tab-content">
   <div id="options">
@@ -777,8 +775,8 @@
       <option value="pink">Pink</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab6" class="tab-content"> -->
 
   <div id="tab7" class="tab-content">
   <div id="options">
@@ -838,8 +836,8 @@
       <option value="pink">Pink</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab7" class="tab-content"> -->
 
   <div id="tab8" class="tab-content">
   <div id="options">
@@ -926,8 +924,8 @@
     <label for="offsetDateBarRightH" title="Horizontal spacing of the dates labels from right of bars, in pixels">Right Space:</label>
     <input type="number" id="offsetDateBarRightH" value="5" onchange="generateGanttChart(event)"/>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab8" class="tab-content"> -->
 
   <div id="tab9" class="tab-content">
   <div id="options">
@@ -974,8 +972,8 @@
     <input type="checkbox" id="showOnlySelected" onclick="generateGanttChart(event)" />
 
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab9" class="tab-content"> -->
 
   </div> <!-- End <div class="tab-content-container"> -->
   </div> <!-- End <div class="tab-container"> -->
@@ -987,20 +985,27 @@
 
 <script>
 
-  function scaleHtmlControls() {
-    const baseWidth = 1300;  // your design width
-    const scaleFactor = window.innerWidth / baseWidth;
-    const wrapper = document.getElementById("htmlScaleWrapper");
-    wrapper.style.transform = "scale(" + scaleFactor + ")";
-    const unscaledHeight = wrapper.offsetHeight;
-    const scaledHeight = unscaledHeight * scaleFactor;
-    const gapRatio = 0.01; // 5% of height (change if needed)
-    const computedGap = scaledHeight * gapRatio;
-    const svgContainer = document.getElementById("svgContainer");
-    svgContainer.style.marginTop = computedGap + "px";
+  function unifiedScale() {
+      const baseWidth  = 800;   // total designed width of HTML + SVG
+      const baseHeight = 600;   // total designed height of HTML + SVG
+      const scaleX = window.innerWidth / baseWidth;
+      const scaleY = window.innerHeight / baseHeight;
+      const preserveAspect = true;  // <--- change to true if you want uniform scaling
+      let finalScaleX = scaleX;
+      let finalScaleY = scaleY;
+      if (preserveAspect) {
+          const s = Math.min(scaleX, scaleY);
+          finalScaleX = s;
+          finalScaleY = s;
+      }
+      const wrapper = document.getElementById("layoutWrapper");
+      wrapper.style.transform =
+          `scale(${finalScaleX.toFixed(3)}, ${finalScaleY.toFixed(3)})`;
+      // OPTIONAL:
+      // If you want to center the scaled content, you can adjust wrapper’s left/top via JS.
   }
-  scaleHtmlControls(); // run once
-  window.addEventListener("resize", scaleHtmlControls); // update on window resize
+  unifiedScale(); // Initial run
+  window.addEventListener("resize", unifiedScale); // Update on resize
 
   const svgNS = "http://www.w3.org/2000/svg";
 
