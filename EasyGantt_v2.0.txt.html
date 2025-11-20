@@ -10,6 +10,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    #layoutWrapper {
+      transform-origin: top left;
+      width: fit-content;
+      height: fit-content;
+    }
+    /* Styling for input text area */
     #ganttChart {
       border: 1px solid #ccc;
     }
@@ -37,9 +43,8 @@
       font-size: 11px; 
     }
     #inputArea input[type="checkbox"] {
-      width: auto; /* Prevents checkbox from being too wide */
+      width: auto;
     }
-
     #tasksSelector {
       display: flex; 
       flex-direction: column;
@@ -55,7 +60,6 @@
       width: 72px;
       height: 72px;
     }
-
     /* Styling for the tab buttons */
     .tab-container {
         display: flex;
@@ -75,22 +79,25 @@
         background-color: #ddd;
         border: 1px solid #ccc;
     }
-
     /* Styling for tab content */
     .tab-content-container {
         margin-top: 2px;
+        position: relative;
+        width: 800px;
     }
     .tab-content {
         display: none;
         padding: 10px;
         border: 1px solid #ccc;
         position: relative;
+        width: 100%;       
+        box-sizing: border-box;
     }
     .tab-content.active {
         display: block;
         position: relative;
     }
-    
+    /* Styles for input controls */
     #options {
       flex-direction: column;
     }
@@ -103,18 +110,15 @@
       font-size: 10px; 
       padding: 1px;
     }
-
     #options select,
-    #options input[type="checkbox"], 
     #options input[type="date"] {
       width: 70px;
       font-size: 10px; 
       padding: 1px;
     }
     #options input[type="checkbox"] {
-      width: auto; /* Prevents checkbox from being too wide */
+      width: auto; 
     }
-
     /* Styles for the Non-Working Dates popup */
     .popup-overlay {
         position: fixed;
@@ -159,8 +163,9 @@
 
 <body onload="generateGanttChart()">
 
+<div id="layoutWrapper">
+<div id="htmlScaleWrapper">
 <div id="title">Easy Gantt - by Giampaolo Marucci</div>
-
 <div id="inputArea">
   <div id="inputText">
     <label for="csvInput" title="Input field for tasks data"><b>Comma or tab separated values for each Task/Line:</b></label><br>
@@ -198,7 +203,7 @@
     <!--</br><label for="editMode" title="Edit mode">Edit Mode</label>
     <input type="checkbox" id="editMode" onchange="generateGanttChart(event)">-->
 
-  </div>
+  </div> <!-- End <div id="inputText"> -->
 
   <div id="tasksSelector"></div>
 
@@ -213,7 +218,7 @@
     <div class="tab-button" onclick="openTab(event, 'tab7')">Delay</div>    
     <div class="tab-button" onclick="openTab(event, 'tab8')">Dates</div>
     <div class="tab-button" onclick="openTab(event, 'tab9')">Filters</div>
-  </div>
+  </div> <!-- End <div class="tab"> -->
 
   <div class="tab-content-container">
   <div id="tab1" class="tab-content active">
@@ -235,8 +240,8 @@
     <label for="percentCompleteMultiplier" title="Multiply Percent Complete by 100">Percent Complete *100:</label>
     <input type="checkbox" id="percentCompleteMultiplier" onclick="generateGanttChart(event)" />
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab1" class="tab-content active"> -->
 
   <div id="tab2" class="tab-content">
   <div id="options">
@@ -323,8 +328,8 @@
     <label for="headerDatesSpace" title="Horizontal spacing of dates in header, in pixels. Increasing the value some dates disappear">Dates Distance:</label>
     <input type="number" id="headerDatesSpace" value="60" onchange="generateGanttChart(event)"/>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab2" class="tab-content"> -->
   
   <div id="tab3" class="tab-content">
   <div id="options">
@@ -424,8 +429,8 @@
       <option value="4,4" selected>Dashed</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab3" class="tab-content"> -->
 
   <div id="tab4" class="tab-content">
   <div id="options">
@@ -548,8 +553,8 @@
       <option value="4,4">Dashed</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab4" class="tab-content"> -->
 
   <div id="tab5" class="tab-content">
   <div id="options">
@@ -663,8 +668,8 @@
     <label for="tasksDetailedInfo_2" title="Show detailed additional task information">Predecessors:</label>
     <input type="checkbox" id="tasksDetailedInfo_2" onclick="generateGanttChart(event)" />
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab5" class="tab-content"> -->
 
   <div id="tab6" class="tab-content">
   <div id="options">
@@ -771,8 +776,8 @@
       <option value="pink">Pink</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab6" class="tab-content"> -->
 
   <div id="tab7" class="tab-content">
   <div id="options">
@@ -832,8 +837,8 @@
       <option value="pink">Pink</option>
     </select>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab7" class="tab-content"> -->
 
   <div id="tab8" class="tab-content">
   <div id="options">
@@ -920,8 +925,8 @@
     <label for="offsetDateBarRightH" title="Horizontal spacing of the dates labels from right of bars, in pixels">Right Space:</label>
     <input type="number" id="offsetDateBarRightH" value="5" onchange="generateGanttChart(event)"/>
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab8" class="tab-content"> -->
 
   <div id="tab9" class="tab-content">
   <div id="options">
@@ -968,16 +973,41 @@
     <input type="checkbox" id="showOnlySelected" onclick="generateGanttChart(event)" />
 
 
-  </div>
-  </div>
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab9" class="tab-content"> -->
 
   </div> <!-- End <div class="tab-content-container"> -->
   </div> <!-- End <div class="tab-container"> -->
 </div> <!-- End <div id="inputArea"> -->
+</div> <!-- End <div id="htmlScaleWrapper"> -->
 
 <div id="svgContainer"></div>
+</div> <!-- End <div id="layoutWrapper"> -->
 
 <script>
+
+  function unifiedScale() {
+      const baseWidth  = 800;   // total designed width of HTML + SVG
+      const baseHeight = 600;   // total designed height of HTML + SVG
+      const scaleX = window.innerWidth / baseWidth;
+      const scaleY = window.innerHeight / baseHeight;
+      const preserveAspect = true;  // <--- change to true if you want uniform scaling
+      let finalScaleX = scaleX;
+      let finalScaleY = scaleY;
+      if (preserveAspect) {
+          const s = Math.min(scaleX, scaleY);
+          finalScaleX = s;
+          finalScaleY = s;
+      }
+      const wrapper = document.getElementById("layoutWrapper");
+      wrapper.style.transform =
+          `scale(${finalScaleX.toFixed(3)}, ${finalScaleY.toFixed(3)})`;
+      // OPTIONAL:
+      // If you want to center the scaled content, you can adjust wrapper’s left/top via JS.
+  }
+  unifiedScale(); // Initial run
+  window.addEventListener("resize", unifiedScale); // Update on resize
+
   const svgNS = "http://www.w3.org/2000/svg";
 
   function openTab(event, tabId) {
@@ -1883,7 +1913,7 @@
     if (totalDays == 0) totalDays = 1;
 
     // LEGEND at top 
-    const legendGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const legendGroup = document.createElementNS(svgNS, "g");
     legendGroup.setAttribute("class", "gantt-legend");
     svg.appendChild(legendGroup);
     const items = [
@@ -1893,7 +1923,9 @@
       { label: "actual % not complete, ",    color: percentNotCompleteColor, spaceX: 160},
       { label: "actual parent % complete, ", color: parentPercentCompleteColor, spaceX: 175},
       { label: "actual parent % not complete, ", color: parentPercentNotCompleteColor, spaceX: 195},
-      { label: "critical", color: criticalPathLineColor, spaceX: 100}
+      { label: "critical, ", color: criticalPathLineColor, spaceX: 75},
+      { label: "milestone, ", color: percentNotCompleteColor, spaceX: 90},
+      { label: "milestone complete", color: percentCompleteColor, spaceX: 0}
     ];
     const legendString = "Legend: ";
     const legendXLabel = leftMargin + 2;
@@ -1903,7 +1935,7 @@
     const boxHeight = 10;
     const textOffset = 25;  // distance between box and label text
     // Legend label
-    const legendLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    const legendLabel = document.createElementNS(svgNS, "text");
     legendLabel.setAttribute("x", legendXLabel);
     legendLabel.setAttribute("y", legendY + boxHeight - 1);
     legendLabel.setAttribute("fill", headerDatesCharColor);
@@ -1915,9 +1947,10 @@
     let x = legendX;
     items.forEach((item, i) => {
       const y = legendY;
-      if (item.label !== "delay task, " && item.label !== "not delay task, ") {
+      if (item.label !== "delay task, " 
+          && item.label !== "not delay task, ") {
         // Draw colored rectangle for legend bars
-        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        const rect = document.createElementNS(svgNS, "rect");
         rect.setAttribute("x", x);
         rect.setAttribute("y", y);
         rect.setAttribute("width", boxWidth);
@@ -1925,9 +1958,17 @@
         rect.setAttribute("fill", item.color);
         rect.setAttribute("stroke", "#333");
         rect.setAttribute("stroke-width", "0.5");
+        // Draw rhombus for milestones
+        if (item.label == "milestone, " || item.label == "milestone complete") {
+          const rhombusCenterX = x + boxWidth / 2;
+          const rhombusCenterY = y + boxHeight / 2;        
+          rect.setAttribute("width", boxWidth / 2);
+          rect.setAttribute("height", boxWidth / 2);
+          rect.setAttribute("transform", `rotate(45 ${rhombusCenterX} ${rhombusCenterY})`);
+        }
         legendGroup.appendChild(rect);
         // Label for legend bars
-        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        const label = document.createElementNS(svgNS, "text");
         label.setAttribute("x", x + textOffset);
         label.setAttribute("y", y + boxHeight - 1);
         label.setAttribute("fill", "#333");
@@ -1938,7 +1979,7 @@
       } 
       if (item.label == "not delay task, ") {
         // Label for tasks
-        const taskLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        const taskLabel = document.createElementNS(svgNS, "text");
         taskLabel.setAttribute("x", x);
         taskLabel.setAttribute("y", y + boxHeight - 1);
         taskLabel.setAttribute("fill", item.color);
@@ -1949,7 +1990,7 @@
       }
       if (item.label == "delay task, ") {
         // Delay Label for tasks
-        const delayLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        const delayLabel = document.createElementNS(svgNS, "text");
         delayLabel.setAttribute("x", x);
         delayLabel.setAttribute("y", y + boxHeight - 1);
         delayLabel.setAttribute("fill", item.color);
