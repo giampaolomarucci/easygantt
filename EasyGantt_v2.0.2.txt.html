@@ -1107,6 +1107,7 @@
   }
 
   // Critical Path Method (CPM) implementation - parse of the input CSV text 
+  let tasksCache = null;
   function parseCSV(data, percentCompleteMultiplier, projectStartDate, todayDate) {
     try {
       if (!data || data.trim().length === 0) {
@@ -1208,7 +1209,7 @@
       adaptParentTasks(reversedTasks, today, nonWorkingDates); // Adapt parent tasks for Dates, Elapsed, and Durations
       // Following passes (CPM)
       let counter = 0;
-      while (!checkParentTasksForElapsedAndDuration(snapshotSortedTasks, [...reversedTasks].reverse())){
+      while (!checkParentTasksForElapsedAndDurationAndDates(snapshotSortedTasks, [...reversedTasks].reverse())){
         sortedTasks = topologicalSort([...reversedTasks].reverse()); 
         snapshotSortedTasks = JSON.parse(JSON.stringify(sortedTasks));
         forwardPassForEarliestDates(sortedTasks, nonWorkingDates, projectStart);
@@ -1223,7 +1224,7 @@
       const allDates = reversedTasks.flatMap(task => [task.startDate, task.endDate]);
       const minDate = new Date(Math.min(...allDates));
       const maxDate = new Date(Math.max(...allDates));
-      const projectDuration = (maxDate - minDate) / oneDayMs;
+      const projectElapsed = (maxDate - minDate) / oneDayMs;
       // Set Total Floats, Critical Tasks 
       reversedTasks.forEach(task => {
         // Set Total Float
@@ -1234,9 +1235,9 @@
           const pathDates = path.flatMap(t => [t.startDate, t.endDate]);
           const pathMinDate = new Date(Math.min(...pathDates));
           const pathMaxDate = new Date(Math.max(...pathDates));
-          const pathDuration = (pathMaxDate - pathMinDate) / oneDayMs;
+          const pathElapsed = (pathMaxDate - pathMinDate) / oneDayMs;
           // Mark tasks in the longest path with total float === 0 as critical
-          if (pathDuration >= projectDuration) { 
+          if (pathElapsed >= projectElapsed) { 
             path.forEach(t => {
               // Set critical task
               if (t.totalFloat===0) {
@@ -1246,7 +1247,7 @@
           }
         });
         // Set Ideal Percentage, Delay, Milestones
-        task.milestone = (task.startDate.getTime() === task.endDate.getTime()) && (task.duration === 0);
+        task.milestone = (task.duration === 0);
         const actualElapsed = Math.max(0, Math.min((today - task.startDate) / oneDayMs, task.elapsed)); // Clamp to [0, totalDuration]
         task.idealPercentComplete = task.elapsed > 0 ? (actualElapsed / task.elapsed) * 100 : 0;
         if (task.milestone && today >= task.startDate) task.idealPercentComplete = 100;
@@ -1259,6 +1260,7 @@
         delete task.originalIndex;
       });
 
+      tasksCache = reversedTasks;
       return reversedTasks;
 
     } catch (error) {
@@ -1276,8 +1278,8 @@
           const validTimestamps = task.predecessors.map(pred => {
             const predTask = tasks.find(t => t.id === pred.id);
             if (!predTask) {
-                alert(`Task ${task.id} - ${task.name} has a missing predecessor ID: ${pred.id}`);
-                return Number.NEGATIVE_INFINITY;
+              alert(`Task ${task.id} - ${task.name} has a missing predecessor ID: ${pred.id}`);
+              return Number.NEGATIVE_INFINITY;
             }
             let leadLag = pred.leadLag || 0;
             leadLag = (leadLag >= 0) ? leadLag + 1 : leadLag - 1; 
@@ -1438,8 +1440,15 @@
         // Elapsed & Duration
         const minDate = new Date(Math.min(...children.map(c => +new Date(c.startDate))));
         const maxDate = new Date(Math.max(...children.map(c => +new Date(c.endDate))));
-        task.elapsed = (maxDate - minDate) / oneDayMs; // Children diff of start and end date is elapsed
-        task.duration = getDuration(minDate, task.elapsed, nonWorkingDatesConfig);
+        task.elapsed = (maxDate - minDate) / oneDayMs; 
+        if (task.elapsed === 0) {
+          task.duration = 0;
+          for (const c of children) {
+            if (c.duration != 0) task.duration = c.duration;
+            break;
+          }
+        } else
+          task.duration = getDuration(minDate, task.elapsed, nonWorkingDatesConfig);
         // Weighted % complete, cleaning of predecessors from children to parent
         let totalDuration = 0, weightedPercentComplete = 0;
         for (const c of children) {
@@ -1462,7 +1471,7 @@
       }
     }
 
-    function checkParentTasksForElapsedAndDuration(tasks1, tasks2) {
+    function checkParentTasksForElapsedAndDurationAndDates(tasks1, tasks2) {
       if (!Array.isArray(tasks1) || !Array.isArray(tasks2) || tasks1.length !== tasks2.length) {
         console.log("Input arrays are invalid or not the same length.");
         return false;
@@ -1480,6 +1489,14 @@
         }
         // Compare elapsed
         if (t1.elapsed !== t2.elapsed) {
+          return false;
+        }
+        // Compare start dates
+        if ((new Date(t1.startDate)).getTime() !== (new Date(t2.startDate)).getTime()) {
+          return false;
+        }
+        // Compare end dates
+        if ((new Date(t1.endDate)).getTime() !== (new Date(t2.endDate)).getTime()) {
           return false;
         }
       }
@@ -1560,28 +1577,43 @@
         
     // Helper function to find paths recursively
     function findPaths(task, tasks, visited = new Set(), currentPath = []) {
-      if (visited.has(task.id)) { // Prevent cycles
-        alert("Error parsing the CSV Project Schedule:\nLoop within the dependencies");
-        throw new Error();
+      if (visited.has(task.id)) {
+        // Skip fallback-induced revisits (not a real dependency loop)
         return [];
       }
       visited.add(task.id);
       currentPath.push(task);
-      const successors = tasks.filter(t =>
+      let successors = tasks.filter(t =>
         t.predecessors.some(p => p.id === task.id)
       );
+      if (successors.length === 0) {
+        let ancestorId = task.parentId;
+        while (ancestorId) {
+          const ancestor = tasks.find(t => t.id === ancestorId);
+          if (!ancestor) break;
+          const ancestorSuccessors = tasks.filter(t =>
+            t.predecessors.some(p => p.id === ancestor.id)
+          );
+          if (ancestorSuccessors.length > 0) {
+            successors = successors.concat(ancestorSuccessors);
+            break; // stop at the first ancestor that has successors
+          }
+          ancestorId = ancestor.parentId; // move up the hierarchy
+        }
+      }
       if (successors.length === 0) {
         // End of a path
         return [currentPath];
       }
+      //successors = successors.filter(s => !visited.has(s.id));
       let paths = [];
       for (const successor of successors) {
         paths = paths.concat(findPaths(successor, tasks, new Set(visited), [...currentPath]));
       }
       return paths;
-    }    
+    }
 
-  }
+  } //End of parseCSV
 
   // Utility function to check if a day is non-working
   function isNonWorkingDay(date, nonWorkingDatesConfig) {
@@ -1596,13 +1628,14 @@
 
   function getElapsed(startDate, duration, nonWorkingDatesConfig) {
     const { saturdayNonWorking, sundayNonWorking, nonWorkingPeriods, nonWorkingDates } = nonWorkingDatesConfig;
+    const oneDayMs = 24 * 60 * 60 * 1000;
     let elapsedDays = 0;
     let workingDaysAdded = 0;
     let currentDate = new Date(startDate);
     if (duration > 0) {
       // Ensure the start date is a working day      
       while (isNonWorkingDay(currentDate, nonWorkingDatesConfig)) {
-        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate = new Date (currentDate.getTime() + oneDayMs);
         elapsedDays++;
       }
       // Forward calculation for positive duration
@@ -1612,17 +1645,17 @@
           workingDaysAdded++;
         }
         elapsedDays++;
-        currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+        currentDate = new Date (currentDate.getTime() + oneDayMs);
       }
       // Ensure the final date is a working day
       while (isNonWorkingDay(currentDate, nonWorkingDatesConfig)) {
-        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate = new Date (currentDate.getTime() + oneDayMs);
         elapsedDays++;
       }
     } else if (duration < 0) {
       // Ensure the start date is a working day
       while (isNonWorkingDay(currentDate, nonWorkingDatesConfig)) {
-        currentDate.setDate(currentDate.getDate() - 1);
+        currentDate = new Date (currentDate.getTime() - oneDayMs);
         elapsedDays--;
       }
       // Backward calculation for negative duration
@@ -1632,11 +1665,11 @@
           workingDaysAdded--;
         }
         elapsedDays--;
-        currentDate.setDate(currentDate.getDate() - 1); // Move to the previous day
+        currentDate = new Date (currentDate.getTime() - oneDayMs);
       }
       // Ensure the final date is a working day
       while (isNonWorkingDay(currentDate, nonWorkingDatesConfig)) {
-        currentDate.setDate(currentDate.getDate() - 1);
+        currentDate = new Date (currentDate.getTime() - oneDayMs);
         elapsedDays--;
       }
     }
@@ -1644,22 +1677,24 @@
   }
 
   function getDuration(startDate, elapsed, nonWorkingDatesConfig) {
-    const currentDate = new Date(startDate);
-    //const { nonWorkingDates } = nonWorkingDatesConfig;
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    let currentDate = new Date(startDate);
     let workingDays = 0;
-    if (elapsed >= 0) {
+    if (elapsed > 0) {
+      workingDays = 1;
       for (let i = 0; i < elapsed; i++) {
         if (!isNonWorkingDay(currentDate, nonWorkingDatesConfig)) {
           workingDays++;
         }
-        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate = new Date (currentDate.getTime() + oneDayMs);
       }
-    } else {
+    } else if (elapsed < 0) {
+      workingDays = -1;
       for (let i = 0; i > elapsed; i--) {
         if (!isNonWorkingDay(currentDate, nonWorkingDatesConfig)) {
           workingDays--;
         }
-        currentDate.setDate(currentDate.getDate() - 1);
+        currentDate = new Date (currentDate.getTime() - oneDayMs);
       }
     }
     return workingDays;
@@ -3308,7 +3343,17 @@
 
     const editMode = document.getElementById("editMode") ? (document.getElementById("editMode")).checked : false;
 
-    const tasks = parseCSV(csvData, percentCompleteMultiplier, projectStartDate, todayDate);
+    let tasks = null;
+    if (!event ||
+        event.target.id == "csvInput" || 
+        event.target.id == "nonWorkingDates" ||
+        event.target.id == "projectStartDate" ||
+        event.target.id == "todayDate" ||
+        event.target.id == "percentCompleteMultiplier" ||
+        event.target.id == "openProjectFromFile")
+      tasks = parseCSV(csvData, percentCompleteMultiplier, projectStartDate, todayDate);
+    else 
+      tasks = tasksCache;
     const { minDate, maxDate, uniqueStartDates } = calculateTimeline(tasks);
 
     // Create the Selector Control only once to avoid re-creation at each event on the page
