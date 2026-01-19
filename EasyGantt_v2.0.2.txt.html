@@ -172,18 +172,18 @@
     <label for="csvInput" style="font-size:9px;" title="Input field for tasks data"><i>Id, Name, Duration, Percent complete, Predecessors, is Parent (optional), Parent id</i></label>   
     <br>
     <textarea id="csvInput" rows="4" cols="53" onchange="generateGanttChart(event)">
-1,Task 1.1,5 days,100.00%,,false
-2,Task 1.2,8 days,90,1FS-1 day,false
-3,Task 1.3,4 days,0.00%,,false
-4,Task 1.3.1,5,10,2FF+1,,3
-5,Milestone 1,0 days,0.00%,4;2;1,false,3
-6,Task 2.1,3 days,100,1SS,false,3
-7,Task 2.2,7 days,100,6,false
-8,Task 2.3,6 days,0.00%,7FS+3 days,false
-9,Task 2.4,12 days,0.00%,,false
+1,Task 1.1,5 days,100.00%,,
+2,Task 1.2,8 days,90,1FS-1 day,
+3,Task 1.3,4 days,0.00%,,
+4,Task 1.3.1,5,10,2FF+1,3
+5,Milestone 1,0 days,0.00%,4;2;1,3
+6,Task 2.1,3 days,100,1SS,3
+7,Task 2.2,7 days,100,6
+8,Task 2.3,6 days,0.00%,7FS+3 days
+9,Task 2.4,12 days,0.00%,
 10,Task 2.4.1, 20, 40,7,9
-11,Milestone 2,0 days,0.00%,5;10,false
-12,Milestone 3,0 days,0.00%,11,false
+11,Milestone 2,0 days,0.00%,5;10
+12,Milestone 3,0 days,0.00%,11
     </textarea><br>
     
     <button id="openProjectFromFile" title="Open a Gantt chart and its Settings from a JSON file type" onclick="openProjectFromFile(event)">Open JSON</button>
@@ -1045,6 +1045,15 @@
     return `${year}-${month}-${day}`; // Format as YYYY-MM-DD
   }
 
+  let nextAlertConfirmed = true;
+  function alertWithConfirmation(alertMessage) {
+    if (nextAlertConfirmed) {
+      nextAlertConfirmed = confirm(alertMessage + 
+                                   "\n\n" + 
+                                   "Press OK to show possible additional alerts or Cancel to skip possible additional alerts\n")
+    }
+  }
+
   //Multi-select selector to select tasks/bars to apply settings
   function createTasksSelectorControl(tasks) {
     const multiSelectControl = document.createElement("select");
@@ -1107,7 +1116,6 @@
   }
 
   // Critical Path Method (CPM) implementation - parse of the input CSV text 
-  let tasksCache = null;
   function parseCSV(data, percentCompleteMultiplier, projectStartDate, todayDate) {
     try {
       if (!data || data.trim().length === 0) {
@@ -1184,11 +1192,11 @@
           endY: 0
         };
         if (task.predecessors.some(p => p.id === task.id)) {
-          alert(`Invalid dependency in CSV: Task ${task.id} - ${task.name} cannot reference itself as a predecessor.`);
+          alertWithConfirmation(`Invalid dependency in CSV: Task ${task.id} - ${task.name} cannot reference itself as a predecessor.`);
           throw new Error();
         }
         if (task.parentId === task.id) {
-          alert(`Invalid parent Id in CSV: Task ${task.id} - ${task.name} cannot reference itself as a parent task.`);
+          alertWithConfirmation(`Invalid parent Id in CSV: Task ${task.id} - ${task.name} cannot reference itself as a parent task.`);
           throw new Error();
         }
         return task;
@@ -1260,12 +1268,11 @@
         delete task.originalIndex;
       });
 
-      tasksCache = reversedTasks;
       return reversedTasks;
 
     } catch (error) {
       //const errorContainer = document.getElementById("errorContainer");
-      alert("Error parsing the CSV Project Schedule:\nThe CSV of the Project Schedule is not formatted correctly\n" + error);
+      alertWithConfirmation("Error parsing the CSV Project Schedule:\nThe CSV of the Project Schedule is not formatted correctly\n" + error);
       console.log(error);
       return []; // Return an empty array to prevent further issues
     }
@@ -1278,7 +1285,7 @@
           const validTimestamps = task.predecessors.map(pred => {
             const predTask = tasks.find(t => t.id === pred.id);
             if (!predTask) {
-              alert(`Task ${task.id} - ${task.name} has a missing predecessor ID: ${pred.id}`);
+              alertWithConfirmation(`Task ${task.id} - ${task.name} has a missing predecessor ID: ${pred.id}`);
               return Number.NEGATIVE_INFINITY;
             }
             let leadLag = pred.leadLag || 0;
@@ -1326,7 +1333,7 @@
                   + getElapsed(predEarliestStartDate, -task.duration, nonWorkingDates) * oneDayMs);
                 break;
               default:
-                alert(`Unknown dependency type: ${pred.dependencyType}`);
+                alertWithConfirmation(`Unknown dependency type: ${pred.dependencyType}`);
                 return Number.NEGATIVE_INFINITY;
             }
             return calculatedDate.getTime();
@@ -1334,7 +1341,7 @@
           if (validTimestamps.length > 0) {
             task.earliestStartDate = new Date(Math.max(...validTimestamps));
           } else {
-            alert(`Date for task ID ${task.id} - ${task.name} set to project start date`);
+            alertWithConfirmation(`Date for task ID ${task.id} - ${task.name} set to project start date`);
             task.earliestStartDate = new Date(projectStartDate); // Fallback to project start date
           }
         }
@@ -1398,7 +1405,7 @@
                   + getElapsed(depLatestFinishDate, leadLag, nonWorkingDates) * oneDayMs);
                 break;
               default:
-                alert(`Unknown dependency type: ${predecessor?.dependencyType}`);
+                alertWithConfirmation(`Unknown dependency type: ${predecessor?.dependencyType}`);
                 calculatedDate = new Date(
                   dep.latestStartDate.getTime() 
                   + getElapsed(dep.latestStartDate, leadLag, nonWorkingDates) * oneDayMs);
@@ -1429,7 +1436,7 @@
         const children = getAllDescendants(tasks, task);
         if (children.length === 0) continue;
         if (task.predecessors[0])
-          alert(`Invalid predecessors in parent task. Task ${task.id} - ${task.name} - is a parent task and cannot have predecessors.\nParent tasks here must be only summary tasks`);
+          alertWithConfirmation(`Invalid predecessors in parent task. Task ${task.id} - ${task.name} - is a parent task and cannot have predecessors.`);
         // Aggregate children values to parent dates
         task.earliestStartDate = new Date(Math.min(...children.map(c => +new Date(c.earliestStartDate))));
         task.latestStartDate   = new Date(Math.min(...children.map(c => +new Date(c.latestStartDate))));
@@ -1791,7 +1798,7 @@
        return { minDate, maxDate, uniqueStartDates };
     } catch (error) {
        //const errorContainer = document.getElementById("errorContainer");
-       alert("Error calculating the timeline:\nThe CSV of the Project Schedule is not formatted correctly");
+       alertWithConfirmation("Error calculating the timeline:\nThe CSV of the Project Schedule is not formatted correctly");
        return null; // Return an empty object to prevent further issues
      }  
   }
@@ -1801,7 +1808,7 @@
       const svgElement = document.getElementById("ganttChart");
 
       if (!svgElement) {
-         alert("No Gantt chart found to export!\nView the Gantt Chart before exporting it to SVG");
+         alertWithConfirmation("No Gantt chart found to export!\nView the Gantt Chart before exporting it to SVG");
          return;
       }
 
@@ -1837,7 +1844,7 @@
         const writableStream = await fileHandle.createWritable();
         await writableStream.write(blob);
         await writableStream.close();
-        alert("File saved successfully!");
+        alertWithConfirmation("File saved successfully!");
       } else {
             // Fallback: Create a temporary <a> element for downloading
             const link = document.createElement("a");
@@ -1847,11 +1854,11 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
-            alert("File downloaded successfully!");
+            alertWithConfirmation("File downloaded successfully!");
         }        
     } catch (error) {
       console.error("Error saving SVG file:", error);
-      alert("Failed to save file. Make sure your browser supports the File System Access API.");
+      alertWithConfirmation("Failed to save file. Make sure your browser supports the File System Access API.");
     } 
   }
 
@@ -2991,10 +2998,10 @@
         const writableStream = await fileHandle.createWritable();
         await writableStream.write(settingsJSON);
         await writableStream.close();
-        alert("Project saved successfully!");
+        alertWithConfirmation("Project saved successfully!");
     } catch (error) {
         console.error("Error saving settings:", error);
-        alert("Failed to save project. Make sure your browser supports the File System Access API.");
+        alertWithConfirmation("Failed to save project. Make sure your browser supports the File System Access API.");
     }
   }
 
@@ -3012,10 +3019,10 @@
       const writableStream = await fileHandle.createWritable();
       await writableStream.write(inputString);
       await writableStream.close();
-      alert("File saved successfully!");
+      alertWithConfirmation("File saved successfully!");
       } catch (error) {
         console.error("Error saving CSV file:", error);
-        alert("Failed to save file. Make sure your browser supports the File System Access API.");
+        alertWithConfirmation("Failed to save file. Make sure your browser supports the File System Access API.");
     }
   } 
 
@@ -3102,7 +3109,7 @@
         }
       } catch (error) {
           console.error("Failed to load settings:", error);
-          alert("Failed to load project. Please ensure the file is valid.");
+          alertWithConfirmation("Failed to load project. Please ensure the file is valid.");
       }
     });
     // Trigger the file input dialog
@@ -3251,7 +3258,9 @@
   // END === EDIT MODE FEATURE ===
 
   function generateGanttChart(event = null) {
-    
+
+    nextAlertConfirmed = true;
+
     const csvData = document.getElementById("csvInput").value;
     const leftMargin = parseInt(document.getElementById("leftMargin").value);
     const verticalShift = parseInt(document.getElementById("verticalShift").value);
@@ -3350,9 +3359,10 @@
         event.target.id == "projectStartDate" ||
         event.target.id == "todayDate" ||
         event.target.id == "percentCompleteMultiplier" ||
-        event.target.id == "openProjectFromFile")
+        event.target.id == "openProjectFromFile") {
       tasks = parseCSV(csvData, percentCompleteMultiplier, projectStartDate, todayDate);
-    else 
+      tasksCache = tasks;
+    } else 
       tasks = tasksCache;
     const { minDate, maxDate, uniqueStartDates } = calculateTimeline(tasks);
 
