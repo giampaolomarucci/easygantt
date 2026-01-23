@@ -1806,12 +1806,10 @@
   async function exportGanttChartAsSVG() {
     try {
       const svgElement = document.getElementById("ganttChart");
-
       if (!svgElement) {
          alertWithConfirmation("No Gantt chart found to export!\nView the Gantt Chart before exporting it to SVG");
          return;
       }
-
       // If in edit mode, sync all current input values before exporting
       const editMode = document.getElementById("editMode") ? (document.getElementById("editMode")).checked : false;
       if (editMode) {
@@ -1823,15 +1821,17 @@
       const viewBox = svgElement.getAttribute("viewBox");
       if (viewBox) {
         clonedSvg.setAttribute("viewBox", viewBox);
+        const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(Number);
+        clonedSvg.setAttribute("width", "100%");
+        clonedSvg.setAttribute("height", vbHeight);
       }
+      clonedSvg.removeAttribute("style");
       // Serialize the SVG element to a string
       const serializer = new XMLSerializer();
       //const svgContent = serializer.serializeToString(svgElement);
       const svgContent = serializer.serializeToString(clonedSvg);
       // Create a blob with the SVG content and a downloadable link
       const blob = new Blob([svgContent], { type: "image/svg+xml" });
-      //const link = document.createElement("a");
-
       if (window.showSaveFilePicker) {
         const fileHandle = await window.showSaveFilePicker({
           suggestedName: "gantt_chart.svg",
