@@ -169,7 +169,7 @@
 <div id="inputArea">
   <div id="inputText">
     <label for="csvInput" title="Input field for tasks data"><b>Comma or tab separated values for each Task/Line:</b></label><br>
-    <label for="csvInput" style="font-size:9px;" title="Input field for tasks data"><i>Id, Name, Duration, Percent complete, Predecessors, is Parent (optional), Parent id</i></label>   
+    <label for="csvInput" style="font-size:9px;" title="Input field for tasks data"><i>Id, Name, Duration, Percent complete, Predecessors, Parent id, Resources</i></label>   
     <br>
     <textarea id="csvInput" rows="4" cols="53" onchange="generateGanttChart(event)">
 1,Task 1.1,5 days,100.00%,,
@@ -657,7 +657,7 @@
     <input type="number" id="horizontalSeparatorsWidth" value="1" onchange="generateGanttChart(event)"/>
 
     <!-- Show detailed tasks info line 0-->
-    <label for="tasksDetailedInfo_0" title="Show detailed additional task information">Actuals:</label>
+    <label for="tasksDetailedInfo_0" title="Show detailed additional task information">Actuals/Resources:</label>
     <input type="checkbox" id="tasksDetailedInfo_0" onclick="generateGanttChart(event)" />
 
     <!-- Show detailed tasks info line 1-->
@@ -964,6 +964,22 @@
     <label for="showOnlyMilestone" title="Show Milestones">Milestones:</label>
     <input type="checkbox" id="showOnlyMilestone" onclick="generateGanttChart(event)" />
 
+    <!-- Show Not Started-->
+    <label for="showOnlyNotStarted" title="Show not started tasks. These are tasks and bars with a start date later than today’s date.">Not Started:</label>
+    <input type="checkbox" id="showOnlyNotStarted" onclick="generateGanttChart(event)" />
+
+    <!-- Show Started-->
+    <label for="showOnlyStarted" title="Show started tasks. These are tasks and bars with a start date earlier than or equal to today’s date.">Started:</label>
+    <input type="checkbox" id="showOnlyStarted" onclick="generateGanttChart(event)" />
+
+    <!-- Show Not Completed-->
+    <label for="showOnlyNotCompleted" title="Show not completed. These are tasks and bars with a percent complete less than 100%.">Not Completed:</label>
+    <input type="checkbox" id="showOnlyNotCompleted" onclick="generateGanttChart(event)" />
+
+    <!-- Show Completed-->
+    <label for="showOnlyCompleted" title="Show completed. These are tasks and bars with a percent complete equal to 100%.">Completed:</label>
+    <input type="checkbox" id="showOnlyCompleted" onclick="generateGanttChart(event)" />
+
     <!-- Show Not Selected-->
     <label for="showOnlyNotSelected" title="Show Not Selected">Not Selected:</label>
     <input type="checkbox" id="showOnlyNotSelected" onclick="generateGanttChart(event)" />
@@ -1135,41 +1151,12 @@
       // Map each row into a task object
       const tasks = rows.map(row => {
         const cols = row.split(separator);
-        // --- For backward compatibility: chech if parent column exist (parent column is optional in the version 2.0 of the software)
-        let parentValue = false;
-        let parentIdValue = 0;
-        // Clean trailing empty columns
-        while (cols.length > 0 && cols[cols.length - 1].trim() === "") cols.pop();
-        if (cols.length >= 6) {
-          const candidate = cols[5]?.trim();
-          if (candidate === "" && cols.length >= 7 && isNumericLike(cols[6])) {
-            // Case 1: "extra comma" empty parent column → skip it and use next one as parentId
-            parentValue = false;
-            parentIdValue = parseInt(cols[6], 10);
-          } else if (isBooleanLike(candidate)) {
-            // Case 2: explicit boolean parent column
-            parentValue = parseBoolean(candidate);
-            parentIdValue = isNumericLike(cols[6]) ? parseInt(cols[6], 10) : 0;
-          } else if (isNumericLike(candidate)) {
-            // Case 3: parent column omitted, candidate is parentId
-            parentValue = false;
-            parentIdValue = parseInt(candidate, 10);
-          } else {
-            // Case 4: unexpected or blank — treat as no parent, no parentId
-            parentValue = false;
-            parentIdValue = 0;
-          }
-        } else if (cols.length === 5) {
-          // Case 5: CSV ends at predecessors (no parent or parentId)
-          parentValue = false;
-          parentIdValue = 0;
-        }
-        // Create Tasks object with initial values
+        // Create task object
         const task = {
           id: parseInt(cols[0], 10),
-          name: cols[1],
+          name: cols[1] ? cols[1] : "",
           duration: parseInt(cols[2], 10),
-          percentComplete: percentCompleteMultiplier ? parseFloat(cols[3])*100 : parseFloat(cols[3]),
+          percentComplete: cols[3] ? (percentCompleteMultiplier ? parseFloat(cols[3]) * 100 : parseFloat(cols[3])) : 0,
           idealPercentComplete: 0,
           earliestStartDate: new Date(projectStart),
           earliestFinishDate: new Date(projectStart),
@@ -1178,25 +1165,31 @@
           startDate: new Date(projectStart),
           endDate: new Date(projectStart),
           predecessors: cols[4] ? parsePredecessors(cols[4]) : [],
+          parent: false,
+          parentId: cols[5] ? parseInt(cols[5], 10) : 0,
+          resources: cols[6] ? cols[6] : "",
           elapsed: 0,
           totalFloat: 0,
           critical: false,
           delay: false,
           milestone: false,
-          parent: parentValue,
-          parentId: parentIdValue,
           depth: 0,
           startX: 0,
           startY: 0,
           endX: 0,
           endY: 0
         };
+        // Validation
         if (task.predecessors.some(p => p.id === task.id)) {
-          alertWithConfirmation(`Invalid dependency in CSV: Task ${task.id} - ${task.name} cannot reference itself as a predecessor.`);
+          alertWithConfirmation(
+            `Invalid dependency in CSV: Task ${task.id} - ${task.name} cannot reference itself as a predecessor.`
+          );
           throw new Error();
         }
         if (task.parentId === task.id) {
-          alertWithConfirmation(`Invalid parent Id in CSV: Task ${task.id} - ${task.name} cannot reference itself as a parent task.`);
+          alertWithConfirmation(
+            `Invalid parent Id in CSV: Task ${task.id} - ${task.name} cannot reference itself as a parent task.`
+          );
           throw new Error();
         }
         return task;
@@ -1725,9 +1718,11 @@
           "elapsed: "+task.elapsed+"\n"+
           "totalFloat: "+task.totalFloat+"\n"+
           "parent task: "+task.parent+"\n"+
+          "parent task id: "+task.parentId+"\n"+
           "critical: "+task.critical+"\n"+
           "delay: "+task.delay+"\n"+
           "milestone: "+task.milestone+"\n"+
+          "resources: "+task.resources+"\n"+
           "startX: "+task.startX+"\n"+
           "startY: "+task.startY+"\n"+
           "endX: "+task.endX+"\n"+
@@ -1737,7 +1732,7 @@
   }
 
   function toCSV(tasks, datesFormat) {
-    CSV = "Id, Name, Duration, Percent Complete, Predecessors, Parent Id, Depth, Elapsed Duration, Total Float, Ideal Percent Complete, Earlier Start Date, Earliest Finish Date, Latest Start Date, Latest Finish Date, Start Date, Finish Date, Parent, Critical, Delay, Milestone\n";
+    CSV = "Id, Name, Duration, Percent Complete, Predecessors, Parent Id, Depth, Elapsed Duration, Total Float, Ideal Percent Complete, Earlier Start Date, Earliest Finish Date, Latest Start Date, Latest Finish Date, Start Date, Finish Date, Resources, Parent, Critical, Delay, Milestone\n";
     tasks.forEach(task => {
         CSV = CSV + 
           String(task.id)+","+
@@ -1756,6 +1751,7 @@
           String(formatDate(task.latestFinishDate, datesFormat))+","+
           String(formatDate(task.startDate, datesFormat))+","+
           String(formatDate(task.endDate, datesFormat))+","+
+          String(task.resources)+","+
           String(task.parent)+","+
           String(task.critical)+","+
           String(task.delay)+","+
@@ -1978,6 +1974,8 @@
            showOnlyNotDelay, showOnlyDelay, 
            showOnlyCritical, showOnlyNotCritical,
            showOnlyNotMilestone, showOnlyMilestone,
+           showOnlyNotStarted, showOnlyStarted,
+           showOnlyNotCompleted, showOnlyCompleted,
            showOnlyNotSelected, showOnlySelected,
            editMode} = options;
 
@@ -2006,7 +2004,19 @@
       tasks = tasks.filter(task => task.milestone === true);
     } else if (showOnlyNotMilestone && !showOnlyMilestone) {
       tasks = tasks.filter(task => task.milestone !== true);
-    }     
+    }
+    // Filter Started tasks if required and available
+    if (showOnlyStarted && !showOnlyNotStarted) {
+      tasks = tasks.filter(task => (new Date(task.startDate)).getTime() <= (new Date(todayDate)).getTime());
+    } else if (showOnlyNotStarted && !showOnlyStarted) {
+      tasks = tasks.filter(task => (new Date(task.startDate)).getTime() > (new Date(todayDate)).getTime());
+    }
+    // Filter Completed tasks if required and available
+    if (showOnlyCompleted && !showOnlyNotCompleted) {
+      tasks = tasks.filter(task => task.percentComplete === 100);
+    } else if (showOnlyNotCompleted && !showOnlyCompleted) {
+      tasks = tasks.filter(task => task.percentComplete < 100);
+    }
     // Filter selected tasks if required and available
     if (showOnlySelected && !showOnlyNotSelected) {
       tasks = tasks.filter(task => isTaskInSelectedTasks(task.id));
@@ -2210,7 +2220,7 @@
     tasksTitle.setAttribute("fill", headerDatesCharColor);
     if (!editMode) {
       tasksTitle.textContent = `Id, Name`;
-      if (tasksDetailedInfo_0) tasksTitle.textContent = tasksTitle.textContent + `, Actual %, Ideal %`;   
+      if (tasksDetailedInfo_0) tasksTitle.textContent = tasksTitle.textContent + `, Actual %, Ideal %, [Resources]`;
 
       if (tasksDetailedInfo_1) {
         const tasksTitleDetailed = document.createElementNS(svgNS, "text");
@@ -2319,7 +2329,8 @@
                           "is milestone: "+task.milestone+"\n"+
                           "is parent: "+task.parent+"\n"+
                           "parent Id: "+task.parentId+"\n"+
-                          "depth: "+task.depth;
+                          "depth: "+task.depth+"\n"+
+                          "resources: "+task.resources;
 
       if (task.milestone) {
         // Draw milestone as a rhombus
@@ -2482,7 +2493,11 @@
                                  String(task.name) : 
                                 (String(task.name).slice(0, Number(taskSettings["tasksTruncate"])) + "...");
       nameText.textContent = `${task.id}, ${truncatedTaskName}`;
-      if (taskSettings["tasksDetailedInfo_0"]) nameText.textContent = nameText.textContent + `, ${Math.round(task.percentComplete)}%, ${Math.round(task.idealPercentComplete)}%`;
+      const resources = task.resources ? ", [" + task.resources + "]" : "";
+      if (taskSettings["tasksDetailedInfo_0"]) 
+          nameText.textContent = nameText.textContent + 
+                                 `, ${Math.round(task.percentComplete)}%, ${Math.round(task.idealPercentComplete)}%` + 
+                                 `${resources}`;
 
       // Task data showed as Title of tasks SVG text on mouse over
       const titleNameText = document.createElementNS(svgNS, "title");
@@ -3347,6 +3362,10 @@
     const showOnlyCritical = (document.getElementById("showOnlyCritical")).checked;
     const showOnlyNotMilestone = (document.getElementById("showOnlyNotMilestone")).checked;
     const showOnlyMilestone = (document.getElementById("showOnlyMilestone")).checked;
+    const showOnlyNotStarted = (document.getElementById("showOnlyNotStarted")).checked;
+    const showOnlyStarted = (document.getElementById("showOnlyStarted")).checked;
+    const showOnlyNotCompleted = (document.getElementById("showOnlyNotCompleted")).checked;
+    const showOnlyCompleted = (document.getElementById("showOnlyCompleted")).checked;
     const showOnlyNotSelected = (document.getElementById("showOnlyNotSelected")).checked;
     const showOnlySelected = (document.getElementById("showOnlySelected")).checked;
 
@@ -3442,6 +3461,8 @@
       showOnlyNotDelay, showOnlyDelay, 
       showOnlyCritical, showOnlyNotCritical,
       showOnlyNotMilestone, showOnlyMilestone,
+      showOnlyNotStarted, showOnlyStarted,
+      showOnlyNotCompleted, showOnlyCompleted,      
       showOnlyNotSelected, showOnlySelected,
       editMode
     });
