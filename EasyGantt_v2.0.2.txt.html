@@ -119,6 +119,12 @@
     #options input[type="checkbox"] {
       width: auto; 
     }
+    #options input[type="text"] {
+      width: 70px;
+      font-size: 10px; 
+      padding: 1px;
+    }
+
     /* Styles for the Non-Working Dates popup */
     .popup-overlay {
         position: fixed;
@@ -657,7 +663,7 @@
     <input type="number" id="horizontalSeparatorsWidth" value="1" onchange="generateGanttChart(event)"/>
 
     <!-- Show detailed tasks info line 0-->
-    <label for="tasksDetailedInfo_0" title="Show detailed additional task information">Actuals/Resources:</label>
+    <label for="tasksDetailedInfo_0" title="Show detailed additional task information">Percent Complete & Resources:</label>
     <input type="checkbox" id="tasksDetailedInfo_0" onclick="generateGanttChart(event)" />
 
     <!-- Show detailed tasks info line 1-->
@@ -988,6 +994,9 @@
     <label for="showOnlySelected" title="Show Selected">Selected:</label>
     <input type="checkbox" id="showOnlySelected" onclick="generateGanttChart(event)" />
 
+    <!-- Show by Keyword-->
+    <label for="showOnlyByKeyword" title="Show by keyword contained in Task Name or Resources">By Keyword:</label>
+    <input type="text" id="showOnlyByKeyword" onchange="generateGanttChart(event)" />
 
   </div> <!-- End <div id="options"> -->
   </div> <!-- End <div id="tab9" class="tab-content"> -->
@@ -1976,6 +1985,7 @@
            showOnlyNotMilestone, showOnlyMilestone,
            showOnlyNotStarted, showOnlyStarted,
            showOnlyNotCompleted, showOnlyCompleted,
+           showOnlyByKeyword,
            showOnlyNotSelected, showOnlySelected,
            editMode} = options;
 
@@ -2017,6 +2027,10 @@
     } else if (showOnlyNotCompleted && !showOnlyCompleted) {
       tasks = tasks.filter(task => task.percentComplete < 100);
     }
+    // Filter by Keywords
+    if (showOnlyByKeyword) {
+      tasks = tasks.filter(task => (task.name).toLowerCase().includes(showOnlyByKeyword) || (task.resources).toLowerCase().includes(showOnlyByKeyword));
+    } 
     // Filter selected tasks if required and available
     if (showOnlySelected && !showOnlyNotSelected) {
       tasks = tasks.filter(task => isTaskInSelectedTasks(task.id));
@@ -3366,6 +3380,7 @@
     const showOnlyStarted = (document.getElementById("showOnlyStarted")).checked;
     const showOnlyNotCompleted = (document.getElementById("showOnlyNotCompleted")).checked;
     const showOnlyCompleted = (document.getElementById("showOnlyCompleted")).checked;
+    const showOnlyByKeyword = (document.getElementById("showOnlyByKeyword")).value;
     const showOnlyNotSelected = (document.getElementById("showOnlyNotSelected")).checked;
     const showOnlySelected = (document.getElementById("showOnlySelected")).checked;
 
@@ -3462,7 +3477,8 @@
       showOnlyCritical, showOnlyNotCritical,
       showOnlyNotMilestone, showOnlyMilestone,
       showOnlyNotStarted, showOnlyStarted,
-      showOnlyNotCompleted, showOnlyCompleted,      
+      showOnlyNotCompleted, showOnlyCompleted,
+      showOnlyByKeyword,
       showOnlyNotSelected, showOnlySelected,
       editMode
     });
