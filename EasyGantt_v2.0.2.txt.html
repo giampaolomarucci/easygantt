@@ -2029,7 +2029,7 @@
     }
     // Filter by Keywords
     if (showOnlyByKeyword) {
-      tasks = tasks.filter(task => (task.name).toLowerCase().includes(showOnlyByKeyword) || (task.resources).toLowerCase().includes(showOnlyByKeyword));
+      tasks = tasks.filter(task => (task.name).toLowerCase().includes(showOnlyByKeyword.toLowerCase()) || (task.resources).toLowerCase().includes(showOnlyByKeyword.toLowerCase()));
     } 
     // Filter selected tasks if required and available
     if (showOnlySelected && !showOnlyNotSelected) {
