@@ -1459,23 +1459,45 @@
         } else
           task.duration = getDuration(minDate, task.elapsed, nonWorkingDatesConfig);
         // Weighted % complete, cleaning of predecessors from children to parent
-        let totalDuration = 0, weightedPercentComplete = 0;
+        let totalDuration = 0;
+        let weightedPercentComplete = 0;
+        let milestoneCount = 0;
+        let completedMilestones = 0;
         for (const c of children) {
-          // Weighted % complete
-          const d = parseFloat(c.duration) || 0;
-          totalDuration += d;
-          weightedPercentComplete += (parseFloat(c.percentComplete) || 0) * d;
+          const duration = parseFloat(c.duration) || 0;
+          const percent = parseFloat(c.percentComplete) || 0;
+          if (duration > 0) {
+            // Normal task → duration-weighted
+            totalDuration += duration;
+            weightedPercentComplete += percent * duration;
+          } else {
+            // Milestone
+            milestoneCount++;
+            if (percent === 100) {
+              completedMilestones++;
+            }
+          }
           // Clean predecessors linking to parent, in children
-          if (Array.isArray(c.predecessors))
+          if (Array.isArray(c.predecessors)) {
             c.predecessors = c.predecessors.filter(p => p.id !== task.id);
-          else if (typeof c.predecessors === "string")
+          } else if (typeof c.predecessors === "string") {
             c.predecessors = c.predecessors
               .split(/;|,/)
               .map(s => s.trim())
               .filter(s => s && !s.startsWith(task.id.toString()))
               .join(";");
+          }
         }
-        task.percentComplete = totalDuration ? Math.round((weightedPercentComplete / totalDuration) * 10) / 10 : 0;
+        // ----- Final percent calculation -----
+        if (totalDuration > 0) {
+          task.percentComplete =
+            Math.round((weightedPercentComplete / totalDuration) * 10) / 10;
+        } else if (milestoneCount > 0) {
+          task.percentComplete =
+            Math.round((completedMilestones / milestoneCount) * 100 * 10) / 10;
+        } else {
+          task.percentComplete = 0;
+        }
         task.parent = true; // We are in a parent task 
       }
     }
