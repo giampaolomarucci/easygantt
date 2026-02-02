@@ -2358,14 +2358,14 @@
                                 Number(taskSettings["parentBarHeight"]) - 2 : 
                                 Number(taskSettings["barHeight"]) - 2;
       const milestoneBarHeightOffset = parent ? 
-                                         Number(taskSettings["parentBarHeight"]) / 2 - 2 : 
-                                         Number(taskSettings["barHeight"]) / 2 - 2 ;
+                                         (Number(taskSettings["parentBarHeight"]) / 2) / Math.SQRT2: 
+                                         (Number(taskSettings["barHeight"]) / 2 ) / Math.SQRT2;
       task.startX = x;
       task.startY = y + barHeightOffset;
       task.endX = x + totalWidth;
       task.endY = y + barHeightOffset;
       if (task.milestone) {
-        task.startX = x + totalWidth - 2;
+        task.startX = x + totalWidth - milestoneBarHeightOffset;
         task.startY = y + milestoneBarHeightOffset;
         task.endX = x + totalWidth + milestoneBarHeightOffset;
         task.endY = y + milestoneBarHeightOffset;
@@ -2407,8 +2407,11 @@
       if (task.milestone) {
         // Draw milestone as a rhombus
         const milestoneRhombus = document.createElementNS(svgNS, "rect");
-        const rhombusWidth = Number(taskSettings["barHeight"]) / 2;
-        const rhombusHeight = Number(taskSettings["barHeight"]) / 2;
+        const rhombusWidth = task.parent 
+                             && (taskSettings["parentBarHeight"]) ? //backword SW compatibility check
+                               Number(taskSettings["parentBarHeight"]) / 2 : 
+                               Number(taskSettings["barHeight"]) / 2;
+        const rhombusHeight = rhombusWidth;
         const rhombusCenterX = x + totalWidth;
         const rhombusCenterY = y;
         milestoneRhombus.setAttribute("x", rhombusCenterX);
