@@ -116,8 +116,13 @@
       font-size: 10px; 
       padding: 1px;
     }
-    #options input[type="checkbox"] {
+    /*#options input[type="checkbox"] {
       width: auto; 
+    }*/
+    #options input[type="checkbox"] {
+      width: 10px;
+      height: 10px;
+      padding: 1px;
     }
     #options input[type="text"] {
       width: 70px;
@@ -218,11 +223,11 @@
     <div class="tab-button active" onclick="openTab(event, 'tab1')">Project</div>
     <div class="tab-button" onclick="openTab(event, 'tab2')">Header</div>
     <div class="tab-button" onclick="openTab(event, 'tab3')">Chart</div>
-    <div class="tab-button" onclick="openTab(event, 'tab4')">Bars</div>
     <div class="tab-button" onclick="openTab(event, 'tab5')">Tasks</div>
-    <div class="tab-button" onclick="openTab(event, 'tab6')">Parents</div>
-    <div class="tab-button" onclick="openTab(event, 'tab7')">Delay</div>    
+    <div class="tab-button" onclick="openTab(event, 'tab4')">Bars</div>
     <div class="tab-button" onclick="openTab(event, 'tab8')">Dates</div>
+    <div class="tab-button" onclick="openTab(event, 'tab10')">Criticals</div>
+    <div class="tab-button" onclick="openTab(event, 'tab11')">Dependencies</div>
     <div class="tab-button" onclick="openTab(event, 'tab9')">Filters</div>
   </div> <!-- End <div class="tab"> -->
 
@@ -386,10 +391,6 @@
       <option value="pink">Pink</option>
     </select>
 
-    <!-- Vertical lines Width -->
-    <label for="verticalLinesWidth" title="Width of the vertical timelines, in pixels">Timelines Width:</label>
-    <input type="number" id="verticalLinesWidth" value="1" onchange="generateGanttChart(event)"/>
-
     <!-- Vertical Lines Color -->
     <label for="verticalLinesColor" title="Color of vertical timelines, 'None' is no vertical lines">Timelines:</label>
     <select id="verticalLinesColor" onclick="generateGanttChart(event)">
@@ -406,6 +407,31 @@
       <option value="teal">Teal</option>
       <option value="pink">Pink</option>
     </select>
+
+    <!-- Vertical lines Width -->
+    <label for="verticalLinesWidth" title="Width of the vertical timelines, in pixels">Timelines Width:</label>
+    <input type="number" id="verticalLinesWidth" value="1" onchange="generateGanttChart(event)"/>
+
+    <!-- Horizontal Separators Lines Color -->
+    <label for="horizontalSeparatorsColor" title="Color of lines separating the bars horizontally, 'None' is no separator lines showed">Separators:</label>
+    <select id="horizontalSeparatorsColor" onclick="generateGanttChart(event)">
+      <option value="none">None</option>
+      <option value="black">Black</option>
+      <option value="orange">Orange</option>
+      <option value="red">Red</option>
+      <option value="yellow">Yellow</option>
+      <option value="brown">Brown</option>
+      <option value="#ccc" selected>Gray</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="purple">Purple</option>
+      <option value="teal">Teal</option>
+      <option value="pink">Pink</option>
+    </select>
+
+    <!-- Horizontal Separators Lines Width -->
+    <label for="horizontalSeparatorsWidth" title="Width of lines separating the bars horizontally, in pixels">Separators width:</label>
+    <input type="number" id="horizontalSeparatorsWidth" value="1" onchange="generateGanttChart(event)"/>
 
     <!-- Today Date Line Color -->
     <label for="todayDateLineColor" title="Color of Today date line, 'None' is no Today date line showed, Today line is not showed if out of dates range in Gnatt chart">Today Line:</label>
@@ -435,6 +461,18 @@
       <option value="4,4" selected>Dashed</option>
     </select>
 
+    <!-- Show detailed tasks info line 0-->
+    <label for="tasksDetailedInfo_0" title="Show detailed additional task information">Percent Complete & Resources:</label>
+    <input type="checkbox" id="tasksDetailedInfo_0" onclick="generateGanttChart(event)" />
+
+    <!-- Show detailed tasks info line 1-->
+    <label for="tasksDetailedInfo_1" title="Show detailed additional task information">Durations:</label>
+    <input type="checkbox" id="tasksDetailedInfo_1" onclick="generateGanttChart(event)" />
+
+    <!-- Show detailed tasks info line 2-->
+    <label for="tasksDetailedInfo_2" title="Show detailed additional task information">Predecessors:</label>
+    <input type="checkbox" id="tasksDetailedInfo_2" onclick="generateGanttChart(event)" />
+
   </div> <!-- End <div id="options"> -->
   </div> <!-- End <div id="tab3" class="tab-content"> -->
 
@@ -443,16 +481,16 @@
   
     <!--Bars Settings-->
 
-    <!-- Bars Height -->
-    <label for="barHeight" title="Height of the bars in the Gantt chart, in pixels">Height:</label>
+    <!-- Child Bars Height -->
+    <label for="barHeight" title="Height of the children bars in the Gantt chart, in pixels">Child Height:</label>
     <input type="number" id="barHeight" value="16" onchange="generateGanttChart(event)"/>
 
-    <!-- Bars Distance -->
-    <label for="barSpace" title="Space between bars in the Gantt chart, in pixels">Space:</label>
+    <!-- Child Bars Distance -->
+    <label for="barSpace" title="Distance between a children bar with the upper bar in the Gantt chart, in pixels">Child Space:</label>
     <input type="number" id="barSpace" value="16" onchange="generateGanttChart(event)"/>
 
-    <!-- Color for Percent Not Complete Bars -->
-    <label for="percentNotCompleteColor" title="Color of the not complete portion of the bars, 'None' is no bar showed">% Not Complete:</label>
+    <!-- Color for Percent Not Complete Child Bars -->
+    <label for="percentNotCompleteColor" title="Color of the not complete portion of the bars, 'None' is no bar showed">Child % Not Complete:</label>
     <select id="percentNotCompleteColor" onclick="generateGanttChart(event)">
       <option value="none">None</option>
       <option value="green">Green</option>
@@ -468,8 +506,8 @@
       <option value="black">black</option>
     </select>
 
-    <!-- Color for Percent Complete Bars --> 
-    <label for="percentCompleteColor" title="Color of the complete portion of the bars,'None' is no bar showed">% Complete:</label>
+    <!-- Color for Percent Complete Child Bars --> 
+    <label for="percentCompleteColor" title="Color of the complete portion of the bars,'None' is no bar showed">Child % Complete:</label>
     <select id="percentCompleteColor" onclick="generateGanttChart(event)">
       <option value="none">None</option>
       <option value="green" selected>Green</option>
@@ -485,8 +523,8 @@
       <option value="black">black</option>
     </select>
 
-    <!-- Color for Border of Bars -->
-    <label for="strokeColor" title="Color of the bars borders, 'None' is no border showed">Border:</label>
+    <!-- Color for Border of Child Bars -->
+    <label for="strokeColor" title="Color of the bars borders, 'None' is no border showed">Child Border:</label>
     <select id="strokeColor" onclick="generateGanttChart(event)">
       <option value="none">None</option>
       <option value="black" selected>Black</option>
@@ -502,62 +540,59 @@
       <option value="gray">Gray</option>
     </select>
 
-    <!-- Bars border thickness -->
-    <label for="barBorderThickness" title="Thickness in pixels of bars borders, only applicable if 'Bars border' color not 'None'">Border Thickness:</label>
+    <!-- Child Bars border thickness -->
+    <label for="barBorderThickness" title="Thickness in pixels of bars borders, only applicable if 'Bars border' color not 'None'">Child Border Thickness:</label>
     <input type="number" id="barBorderThickness" value="1" onchange="generateGanttChart(event)"/>
 
-    <!-- Bars angles -->
-    <label for="barAngles" title="Angle size of the bars corners, 0 is 90 degrees angle applied">Angles:</label>
+    <!-- Child Bars angles -->
+    <label for="barAngles" title="Angle size of the bars corners, 0 is 90 degrees angle applied">Child Angles:</label>
     <input type="number" id="barAngles" value="0" onchange="generateGanttChart(event)"/>
 
-    <!-- Critical Path Line Color -->
-    <label for="criticalPathLineColor" title="Color of the critical bars section within the critical bars, 'None' is no critial section is showed within the bars">Critical:</label>
-    <select id="criticalPathLineColor" onclick="generateGanttChart(event)">
-      <option value="none">None</option>
-      <option value="black">Black</option>
-      <option value="orange">Orange</option>
-      <option value="red" selected>Red</option>
-      <option value="yellow">Yellow</option>
-      <option value="brown">Brown</option>
-      <option value="gray">Gray</option>
-      <option value="green">Green</option>
-      <option value="blue">Blue</option>
-      <option value="purple">Purple</option>
-      <option value="teal">Teal</option>
-      <option value="pink">Pink</option>
-    </select>
+    <!-- Parent Bars Height -->
+    <label for="parentBarHeight" title="Height of the parent bars in the Gantt chart, in pixels">Parent Height:</label>
+    <input type="number" id="parentBarHeight" value="10" onchange="generateGanttChart(event)"/>
 
-    <!-- Critical Path Line Width -->
-    <label for="criticalPathLineWidth" title="Width of the critical section within the critical bars of the critical path, only applicable if 'Critical' is not 'None'">Critical Width:</label>
-    <input type="number" id="criticalPathLineWidth" value="2" onchange="generateGanttChart(event)"/>
+    <!-- Parent Bars Distance -->
+    <label for="parentBarSpace" title="Distance between a parent bar with the upper bar in the Gantt chart, in pixels">Parent Space:</label>
+    <input type="number" id="parentBarSpace" value="20" onchange="generateGanttChart(event)"/>
 
-    <!-- Dependecies Line Color -->
-    <label for="dependenciesLineColor" title="Color of dependency lines, 'None' is no dependency lines showed">Dependencies:</label>
-    <select id="dependenciesLineColor" onclick="generateGanttChart(event)">
+    <!-- Color for Percent Not Complete Parent Bars -->
+    <label for="parentPercentNotCompleteColor" title="Color of the not complete portion of the parent bars, 'None' is no bar showed">Parent % Not Complete:</label>
+    <select id="parentPercentNotCompleteColor" onclick="generateGanttChart(event)">
       <option value="none">None</option>
-      <option value="black">Black</option>
-      <option value="orange">Orange</option>
-      <option value="red">Red</option>
-      <option value="yellow">Yellow</option>
-      <option value="brown">Brown</option>
-      <option value="gray">Gray</option>
       <option value="green">Green</option>
       <option value="blue">Blue</option>
       <option value="purple">Purple</option>
       <option value="teal" selected>Teal</option>
       <option value="pink">Pink</option>
+      <option value="orange">Orange</option>
+      <option value="red">Red</option>
+      <option value="yellow">Yellow</option>
+      <option value="brown">Brown</option>
+      <option value="gray">Gray</option>
+      <option value="black">black</option>
     </select>
 
-    <!-- Dependencies Line Width -->
-    <label for="dependenciesLineWidth" title="Width of the dependencies lines, only applicable if 'Dependencies' is not 'none'">Dependencies Width:</label>
-    <input type="number" id="dependenciesLineWidth" value="1" onchange="generateGanttChart(event)"/>
-
-    <!-- Dependecies Dashed Line -->
-    <label for="dependenciesLineDashed" title="Style of dependency lines, applicable only if 'Dependencies' in not 'None'">Dependencies Dashed:</label>
-    <select id="dependenciesLineDashed" onclick="generateGanttChart(event)">
-      <option value="0,0" selected>Not Dashed</option>
-      <option value="4,4">Dashed</option>
+    <!-- Color for Percent Complete Parent Bars --> 
+    <label for="parentPercentCompleteColor" title="Color of the complete portion of the parent bars,'None' is no bar showed">Parent % Complete:</label>
+    <select id="parentPercentCompleteColor" onclick="generateGanttChart(event)">
+      <option value="none">None</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="purple">Purple</option>
+      <option value="teal">Teal</option>
+      <option value="pink" selected>Pink</option>
+      <option value="orange">Orange</option>
+      <option value="red">Red</option>
+      <option value="yellow">Yellow</option>
+      <option value="brown">Brown</option>
+      <option value="gray">Gray</option>
+      <option value="black">black</option>
     </select>
+
+    <!-- Parent Bars angles -->
+    <label for="parentBarAngles" title="Angle size of the parent bars corners, 0 is 90 degrees angle applied">Parent Bar Angles:</label>
+    <input type="number" id="parentBarAngles" value="6" onchange="generateGanttChart(event)"/>    
 
   </div> <!-- End <div id="options"> -->
   </div> <!-- End <div id="tab4" class="tab-content"> -->
@@ -567,11 +602,11 @@
     <!-- Tasks Settings -->
 
     <!-- Tasks char size -->
-    <label for="tasksCharSize" title="Size of task labels text, in pixels">Size:</label>
+    <label for="tasksCharSize" title="Size of task labels text, in pixels">Child Size:</label>
     <input type="number" id="tasksCharSize" value="12" onchange="generateGanttChart(event)"/>
 
     <!-- Tasks char family -->
-    <label for="tasksCharFamily" title="Font family of tasks labels text">Family:</label>
+    <label for="tasksCharFamily" title="Font family of tasks labels text">Child Family:</label>
     <select id="tasksCharFamily" onclick="generateGanttChart(event)">
         <option value="Arial">Arial</option>
         <option value="Verdana">Verdana</option>
@@ -596,7 +631,7 @@
     </select>
 
     <!-- Tasks Char Style -->
-    <label for="tasksCharStyle" title="Style of tasks labels text">Style:</label>
+    <label for="tasksCharStyle" title="Style of tasks labels text">Child Style:</label>
     <select id="tasksCharStyle" onclick="generateGanttChart(event)">
       <option value="normal" selected>Normal</option>
       <option value="italic">Italic</option>
@@ -604,7 +639,7 @@
     </select>
 
     <!-- Tasks Char Weight -->
-    <label for="tasksCharWeight" title="Weight of the tasks labels text">Weight:</label>
+    <label for="tasksCharWeight" title="Weight of the tasks labels text">Child Weight:</label>
     <select id="tasksCharWeight" onclick="generateGanttChart(event)">
       <option value="normal" selected>Normal</option>
       <option value="bold">Bold</option>
@@ -613,7 +648,7 @@
     </select>
 
     <!-- Tasks Char Color -->
-    <label for="tasksCharColor" title="Color of tasks labels text, 'None' is no tasks label showed. Combined with the 'Tasks Delay' color">Color:</label>
+    <label for="tasksCharColor" title="Color of tasks labels text, 'None' is no tasks label showed. Combined with the 'Tasks Delay' color">Child Color:</label>
     <select id="tasksCharColor" onclick="generateGanttChart(event)">
       <option value="none">None</option>
       <option value="black" selected>Black</option>
@@ -641,160 +676,12 @@
     <label for="tasksTruncate" title="Number of characters to truncate the task names">Trunc:</label>
     <input type="number" id="tasksTruncate" value="35" onchange="generateGanttChart(event)"/>
 
-    <!-- Horizontal Separators Lines Color -->
-    <label for="horizontalSeparatorsColor" title="Color of lines separating the bars horizontally, 'None' is no separator lines showed">Separators:</label>
-    <select id="horizontalSeparatorsColor" onclick="generateGanttChart(event)">
-      <option value="none">None</option>
-      <option value="black">Black</option>
-      <option value="orange">Orange</option>
-      <option value="red">Red</option>
-      <option value="yellow">Yellow</option>
-      <option value="brown">Brown</option>
-      <option value="#ccc" selected>Gray</option>
-      <option value="green">Green</option>
-      <option value="blue">Blue</option>
-      <option value="purple">Purple</option>
-      <option value="teal">Teal</option>
-      <option value="pink">Pink</option>
-    </select>
-
-    <!-- Horizontal Separators Lines Width -->
-    <label for="horizontalSeparatorsWidth" title="Width of lines separating the bars horizontally, in pixels">Separators width:</label>
-    <input type="number" id="horizontalSeparatorsWidth" value="1" onchange="generateGanttChart(event)"/>
-
-    <!-- Show detailed tasks info line 0-->
-    <label for="tasksDetailedInfo_0" title="Show detailed additional task information">Percent Complete & Resources:</label>
-    <input type="checkbox" id="tasksDetailedInfo_0" onclick="generateGanttChart(event)" />
-
-    <!-- Show detailed tasks info line 1-->
-    <label for="tasksDetailedInfo_1" title="Show detailed additional task information">Durations:</label>
-    <input type="checkbox" id="tasksDetailedInfo_1" onclick="generateGanttChart(event)" />
-
-    <!-- Show detailed tasks info line 2-->
-    <label for="tasksDetailedInfo_2" title="Show detailed additional task information">Predecessors:</label>
-    <input type="checkbox" id="tasksDetailedInfo_2" onclick="generateGanttChart(event)" />
-
-  </div> <!-- End <div id="options"> -->
-  </div> <!-- End <div id="tab5" class="tab-content"> -->
-
-  <div id="tab6" class="tab-content">
-  <div id="options">
-    <!-- Parent Settings -->
-
-    <!-- Color for Percent Not Complete Parent Bars -->
-    <label for="parentPercentNotCompleteColor" title="Color of the not complete portion of the parent bars, 'None' is no bar showed">% Not Complete:</label>
-    <select id="parentPercentNotCompleteColor" onclick="generateGanttChart(event)">
-      <option value="none">None</option>
-      <option value="green">Green</option>
-      <option value="blue">Blue</option>
-      <option value="purple">Purple</option>
-      <option value="teal" selected>Teal</option>
-      <option value="pink">Pink</option>
-      <option value="orange">Orange</option>
-      <option value="red">Red</option>
-      <option value="yellow">Yellow</option>
-      <option value="brown">Brown</option>
-      <option value="gray">Gray</option>
-      <option value="black">black</option>
-    </select>
-
-    <!-- Color for Percent Complete Parent Bars --> 
-    <label for="parentPercentCompleteColor" title="Color of the complete portion of the parent bars,'None' is no bar showed">% Complete:</label>
-    <select id="parentPercentCompleteColor" onclick="generateGanttChart(event)">
-      <option value="none">None</option>
-      <option value="green">Green</option>
-      <option value="blue">Blue</option>
-      <option value="purple">Purple</option>
-      <option value="teal">Teal</option>
-      <option value="pink" selected>Pink</option>
-      <option value="orange">Orange</option>
-      <option value="red">Red</option>
-      <option value="yellow">Yellow</option>
-      <option value="brown">Brown</option>
-      <option value="gray">Gray</option>
-      <option value="black">black</option>
-    </select>
-
-    <!-- Parent Bars angles -->
-    <label for="parentBarAngles" title="Angle size of the parent bars corners, 0 is 90 degrees angle applied">Bar Angles:</label>
-    <input type="number" id="parentBarAngles" value="6" onchange="generateGanttChart(event)"/>    
-
-    <!-- Parent char size -->
-    <label for="parentsCharSize" title="Size of parent task labels text, in pixels">Char Size:</label>
-    <input type="number" id="parentsCharSize" value="12" onchange="generateGanttChart(event)"/>
-
-    <!-- Parents char family -->
-    <label for="parentsCharFamily" title="Font family of parent tasks labels text">Char Family:</label>
-    <select id="parentsCharFamily" onclick="generateGanttChart(event)">
-        <option value="Arial">Arial</option>
-        <option value="Verdana">Verdana</option>
-        <option value="Helvetica" selected>Helvetica</option>
-        <option value="Times New Roman">Times New Roman</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Tahoma">Tahoma</option>
-        <option value="Trebuchet MS">Trebuchet MS</option>
-        <option value="Impact">Impact</option>
-        <option value="Comic Sans MS">Comic Sans MS</option>
-        <option value="Lucida Sans">Lucida Sans</option>
-        <option value="Calibri">Calibri</option>
-        <option value="Garamond">Garamond</option>
-        <option value="Cambria">Cambria</option>
-        <option value="Palatino">Palatino</option>
-        <option value="Roboto">Roboto</option>
-        <option value="Open Sans">Open Sans</option>
-        <option value="Lato">Lato</option>
-        <option value="Montserrat">Montserrat</option>
-        <option value="Raleway">Raleway</option>
-    </select>
-
-    <!-- Parents Char Style -->
-    <label for="parentsCharStyle" title="Style of parent tasks labels text">Char Style:</label>
-    <select id="parentsCharStyle" onclick="generateGanttChart(event)">
-      <option value="normal" selected>Normal</option>
-      <option value="italic">Italic</option>
-      <option value="oblique">Oblique</option>
-    </select>
-
-    <!-- Parents Char Weight -->
-    <label for="parentsCharWeight" title="Weight of the parent tasks labels text">Char Weight:</label>
-    <select id="parentsCharWeight" onclick="generateGanttChart(event)">
-      <option value="normal">Normal</option>
-      <option value="bold" selected>Bold</option>
-      <option value="lighter">Lighter</option>
-      <option value="bolder">Bolder</option>
-    </select>
-
-    <!-- Parents Char Color -->
-    <label for="parentsCharColor" title="Color of parent tasks labels text, 'None' is no tasks label showed. Combined with the 'Tasks Delay' color">Char Color:</label>
-    <select id="parentsCharColor" onclick="generateGanttChart(event)">
-      <option value="none">None</option>
-      <option value="black" selected>Black</option>
-      <option value="orange">Orange</option>
-      <option value="red">Red</option>
-      <option value="yellow">Yellow</option>
-      <option value="brown">Brown</option>
-      <option value="gray">Gray</option>
-      <option value="green">Green</option>
-      <option value="blue">Blue</option>
-      <option value="purple">Purple</option>
-      <option value="teal">Teal</option>
-      <option value="pink">Pink</option>
-    </select>
-
-  </div> <!-- End <div id="options"> -->
-  </div> <!-- End <div id="tab6" class="tab-content"> -->
-
-  <div id="tab7" class="tab-content">
-  <div id="options">
-    <!-- Delay Tasks Settings -->
-
     <!-- Delay char size -->
-    <label for="delayCharSize" title="Size of delay task labels text, in pixels">Size:</label>
+    <label for="delayCharSize" title="Size of delay task labels text, in pixels">Delay Size:</label>
     <input type="number" id="delayCharSize" value="12" onchange="generateGanttChart(event)"/>
 
     <!-- Delay char family -->
-    <label for="delayCharFamily" title="Font family of delay tasks labels text">Family:</label>
+    <label for="delayCharFamily" title="Font family of delay tasks labels text">Delay Family:</label>
     <select id="delayCharFamily" onclick="generateGanttChart(event)">
         <option value="Arial">Arial</option>
         <option value="Verdana">Verdana</option>
@@ -819,7 +706,7 @@
     </select>
 
     <!-- Delay Char Style -->
-    <label for="delayCharStyle" title="Style of delay tasks labels text">Style:</label>
+    <label for="delayCharStyle" title="Style of delay tasks labels text">Delay Style:</label>
     <select id="delayCharStyle" onclick="generateGanttChart(event)">
       <option value="normal" selected>Normal</option>
       <option value="italic">Italic</option>
@@ -827,7 +714,7 @@
     </select>
 
     <!-- Delay Char Color -->
-    <label for="delayCharColor" title="Color of delay tasks labels text, 'None' is no tasks label showed. Combined with the 'Tasks Delay' color">Color:</label>
+    <label for="delayCharColor" title="Color of delay tasks labels text, 'None' is no tasks label showed. Combined with the 'Tasks Delay' color">Delay Color:</label>
     <select id="delayCharColor" onclick="generateGanttChart(event)">
       <option value="none">None</option>
       <option value="black">Black</option>
@@ -843,8 +730,71 @@
       <option value="pink">Pink</option>
     </select>
 
+    <!-- Parent char size -->
+    <label for="parentsCharSize" title="Size of parent task labels text, in pixels">Parent Size:</label>
+    <input type="number" id="parentsCharSize" value="12" onchange="generateGanttChart(event)"/>
+
+    <!-- Parents char family -->
+    <label for="parentsCharFamily" title="Font family of parent tasks labels text">Parent Family:</label>
+    <select id="parentsCharFamily" onclick="generateGanttChart(event)">
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Helvetica" selected>Helvetica</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Tahoma">Tahoma</option>
+        <option value="Trebuchet MS">Trebuchet MS</option>
+        <option value="Impact">Impact</option>
+        <option value="Comic Sans MS">Comic Sans MS</option>
+        <option value="Lucida Sans">Lucida Sans</option>
+        <option value="Calibri">Calibri</option>
+        <option value="Garamond">Garamond</option>
+        <option value="Cambria">Cambria</option>
+        <option value="Palatino">Palatino</option>
+        <option value="Roboto">Roboto</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Lato">Lato</option>
+        <option value="Montserrat">Montserrat</option>
+        <option value="Raleway">Raleway</option>
+    </select>
+
+    <!-- Parents Char Style -->
+    <label for="parentsCharStyle" title="Style of parent tasks labels text">Parent Style:</label>
+    <select id="parentsCharStyle" onclick="generateGanttChart(event)">
+      <option value="normal" selected>Normal</option>
+      <option value="italic">Italic</option>
+      <option value="oblique">Oblique</option>
+    </select>
+
+    <!-- Parents Char Weight -->
+    <label for="parentsCharWeight" title="Weight of the parent tasks labels text">Parent Weight:</label>
+    <select id="parentsCharWeight" onclick="generateGanttChart(event)">
+      <option value="normal">Normal</option>
+      <option value="bold" selected>Bold</option>
+      <option value="lighter">Lighter</option>
+      <option value="bolder">Bolder</option>
+    </select>
+
+    <!-- Parents Char Color -->
+    <label for="parentsCharColor" title="Color of parent tasks labels text, 'None' is no tasks label showed. Combined with the 'Tasks Delay' color">Parent Color:</label>
+    <select id="parentsCharColor" onclick="generateGanttChart(event)">
+      <option value="none">None</option>
+      <option value="black" selected>Black</option>
+      <option value="orange">Orange</option>
+      <option value="red">Red</option>
+      <option value="yellow">Yellow</option>
+      <option value="brown">Brown</option>
+      <option value="gray">Gray</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="purple">Purple</option>
+      <option value="teal">Teal</option>
+      <option value="pink">Pink</option>
+    </select>
+
   </div> <!-- End <div id="options"> -->
-  </div> <!-- End <div id="tab7" class="tab-content"> -->
+  </div> <!-- End <div id="tab5" class="tab-content"> -->
 
   <div id="tab8" class="tab-content">
   <div id="options">
@@ -1000,6 +950,71 @@
 
   </div> <!-- End <div id="options"> -->
   </div> <!-- End <div id="tab9" class="tab-content"> -->
+
+  <div id="tab10" class="tab-content">
+  <div id="options">
+
+    <!--Critical Bar Settings-->
+
+    <!-- Critical Path Line Color -->
+    <label for="criticalPathLineColor" title="Color of the critical bars section within the critical bars, 'None' is no critial section is showed within the bars">Critical Path Color:</label>
+    <select id="criticalPathLineColor" onclick="generateGanttChart(event)">
+      <option value="none">None</option>
+      <option value="black">Black</option>
+      <option value="orange">Orange</option>
+      <option value="red" selected>Red</option>
+      <option value="yellow">Yellow</option>
+      <option value="brown">Brown</option>
+      <option value="gray">Gray</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="purple">Purple</option>
+      <option value="teal">Teal</option>
+      <option value="pink">Pink</option>
+    </select>
+
+    <!-- Critical Path Line Width -->
+    <label for="criticalPathLineWidth" title="Width of the critical section within the critical bars of the critical path, only applicable if 'Critical' is not 'None'">Critical Path Width:</label>
+    <input type="number" id="criticalPathLineWidth" value="2" onchange="generateGanttChart(event)"/>
+
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab10" class="tab-content"> -->
+
+  <div id="tab11" class="tab-content">
+  <div id="options">
+    
+    <!--Dependencies Settings-->
+
+    <!-- Dependecies Line Color -->
+    <label for="dependenciesLineColor" title="Color of dependency lines, 'None' is no dependency lines showed">Dependency Lines Color:</label>
+    <select id="dependenciesLineColor" onclick="generateGanttChart(event)">
+      <option value="none">None</option>
+      <option value="black">Black</option>
+      <option value="orange">Orange</option>
+      <option value="red">Red</option>
+      <option value="yellow">Yellow</option>
+      <option value="brown">Brown</option>
+      <option value="gray">Gray</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="purple">Purple</option>
+      <option value="teal" selected>Teal</option>
+      <option value="pink">Pink</option>
+    </select>
+
+    <!-- Dependencies Line Width -->
+    <label for="dependenciesLineWidth" title="Width of the dependencies lines, only applicable if 'Dependencies' is not 'none'">Dependency Lines Width:</label>
+    <input type="number" id="dependenciesLineWidth" value="1" onchange="generateGanttChart(event)"/>
+
+    <!-- Dependecies Dashed Line -->
+    <label for="dependenciesLineDashed" title="Style of dependency lines, applicable only if 'Dependencies' in not 'None'">Dependency Dashed Lines:</label>
+    <select id="dependenciesLineDashed" onclick="generateGanttChart(event)">
+      <option value="0,0" selected>Not Dashed</option>
+      <option value="4,4">Dashed</option>
+    </select>
+
+  </div> <!-- End <div id="options"> -->
+  </div> <!-- End <div id="tab11" class="tab-content"> -->
 
   </div> <!-- End <div class="tab-content-container"> -->
   </div> <!-- End <div class="tab-container"> -->
@@ -1970,6 +1985,8 @@
            parentsCharStyle,
            parentsCharWeight,
            parentsCharColor,
+           parentBarHeight,
+           parentBarSpace,
            delayCharSize,
            delayCharFamily,
            delayCharStyle,
@@ -2092,8 +2109,14 @@
           }
         }
       }
-      const barHeight = Number(TasksSettings.getTaskSettingByName(task.id, "barHeight"));
-      const barSpace = Number(TasksSettings.getTaskSettingByName(task.id, "barSpace"));
+      const barHeight = task.parent && 
+                        TasksSettings.getTaskSettingByName(task.id, "parentBarHeight") ? //backword SW compatibility check
+                          Number(TasksSettings.getTaskSettingByName(task.id, "parentBarHeight")) :
+                          Number(TasksSettings.getTaskSettingByName(task.id, "barHeight"));
+      const barSpace = task.parent && 
+                       TasksSettings.getTaskSettingByName(task.id, "parentBarSpace") ? //backword SW compatibility check
+                         Number(TasksSettings.getTaskSettingByName(task.id, "parentBarSpace")) :
+                         Number(TasksSettings.getTaskSettingByName(task.id, "barSpace"));
       chartHeight = chartHeight + barHeight + barSpace;
       bottomMargin = barHeight + barSpace > bottomMargin ?
                      barHeight + barSpace :
@@ -2318,21 +2341,34 @@
       const x = leftMargin + verticalShift + offsetZeroX + ((task.startDate - minDate) / oneDayMs) / totalDays * chartWidth;
 
       const taskSettings = TasksSettings.getTaskSettings(task.id);
-      y = y + Number(taskSettings["barHeight"]) + Number(taskSettings["barSpace"]);
+      y = y + 
+          ((task.parent && 
+            taskSettings["parentBarHeight"] && taskSettings["parentBarSpace"]) ? //backword SW compatibility check
+              Number(taskSettings["parentBarHeight"]) + Number(taskSettings["parentBarSpace"]) :
+              Number(taskSettings["barHeight"]) + Number(taskSettings["barSpace"])
+          );
 
       // Draw the bar correlated to the current task
       drawBar(x, y, totalWidth, widthComplete, task, taskSettings);
       
       // For each task memorize coordinate x,y to use in dependecies drawing
+      const parent = (task.parent && 
+                      taskSettings["parentBarHeight"]); //backword SW compatibility check
+      const barHeightOffset = parent ? 
+                                Number(taskSettings["parentBarHeight"]) - 2 : 
+                                Number(taskSettings["barHeight"]) - 2;
+      const milestoneBarHeightOffset = parent ? 
+                                         Number(taskSettings["parentBarHeight"]) / 2 - 2 : 
+                                         Number(taskSettings["barHeight"]) / 2 - 2 ;
       task.startX = x;
-      task.startY = y + Number(taskSettings["barHeight"]) - 2;
+      task.startY = y + barHeightOffset;
       task.endX = x + totalWidth;
-      task.endY = y + Number(taskSettings["barHeight"]) - 2;
+      task.endY = y + barHeightOffset;
       if (task.milestone) {
         task.startX = x + totalWidth - 2;
-        task.startY = y + Number(taskSettings["barHeight"]) / 2 - 2;
-        task.endX = x + totalWidth + Number(taskSettings["barHeight"]) / 2 - 2;
-        task.endY = y + Number(taskSettings["barHeight"]) / 2 - 2;
+        task.startY = y + milestoneBarHeightOffset;
+        task.endX = x + totalWidth + milestoneBarHeightOffset;
+        task.endY = y + milestoneBarHeightOffset;
       }  
     });
 
@@ -2416,6 +2452,8 @@
         notCompleteRect.setAttribute("rx", taskSettings["barAngles"]); 
         notCompleteRect.setAttribute("ry", taskSettings["barAngles"]);
         if (task.parent) {
+          if (taskSettings["parentBarHeight"]) //backword SW compatibility check
+            notCompleteRect.setAttribute("height", taskSettings["parentBarHeight"]);
           notCompleteRect.setAttribute("fill", taskSettings["parentPercentNotCompleteColor"]);
           notCompleteRect.setAttribute("rx", taskSettings["parentBarAngles"]);
           notCompleteRect.setAttribute("ry", taskSettings["parentBarAngles"]); 
@@ -2440,6 +2478,8 @@
         completeRect.setAttribute("rx", taskSettings["barAngles"]); 
         completeRect.setAttribute("ry", taskSettings["barAngles"]);
         if (task.parent) {
+          if (taskSettings["parentBarHeight"]) //backword SW compatibility check
+            completeRect.setAttribute("height", taskSettings["parentBarHeight"]);
           completeRect.setAttribute("fill", taskSettings["parentPercentCompleteColor"]);
           completeRect.setAttribute("rx", taskSettings["parentBarAngles"]); 
           completeRect.setAttribute("ry", taskSettings["parentBarAngles"]);
@@ -2456,7 +2496,15 @@
         if (task.critical) {
           const criticalRect = document.createElementNS(svgNS, "rect");
           criticalRect.setAttribute("x", x);
-          criticalRect.setAttribute("y", y + (Number(taskSettings["barHeight"]) - Number(taskSettings["criticalPathLineWidth"]))/2);
+          criticalRect.setAttribute("y", y + (
+                                               ((task.parent && 
+                                                 taskSettings["parentBarHeight"]) ? //backword SW compatibility check
+                                                   Number(taskSettings["parentBarHeight"]) : 
+                                                   Number(taskSettings["barHeight"])
+                                               ) - 
+                                               Number(taskSettings["criticalPathLineWidth"])
+                                             )/2
+                                   );
           criticalRect.setAttribute("width", totalWidth);
           criticalRect.setAttribute("height", taskSettings["criticalPathLineWidth"]);
           criticalRect.setAttribute("fill", taskSettings["criticalPathLineColor"]);
@@ -2616,9 +2664,21 @@
       // Horizontal line separator
       const lineSeparator = document.createElementNS(svgNS, "line");
       lineSeparator.setAttribute("x1", leftMargin + 2);
-      lineSeparator.setAttribute("y1", y + Number(taskSettings["barHeight"]) + 8);
+      lineSeparator.setAttribute("y1", y + 
+                                       (task.parent && 
+                                        taskSettings["parentBarHeight"] ? //backword SW compatibility check
+                                          Number(taskSettings["parentBarHeight"]) : 
+                                          Number(taskSettings["barHeight"])
+                                       ) + 8
+                                );
       lineSeparator.setAttribute("x2", (leftMargin + verticalShift + offsetZeroX + ((maxDate - minDate) + oneDayMs)/ oneDayMs / totalDays * chartWidth));
-      lineSeparator.setAttribute("y2", y + Number(taskSettings["barHeight"]) + 8);
+      lineSeparator.setAttribute("y2", y + 
+                                       (task.parent && 
+                                        taskSettings["parentBarHeight"] ? //backword SW compatibility check
+                                          Number(taskSettings["parentBarHeight"]) : 
+                                          Number(taskSettings["barHeight"])
+                                       ) + 8
+                                );
       lineSeparator.setAttribute("stroke", taskSettings["horizontalSeparatorsColor"]);
       lineSeparator.setAttribute("stroke-width", taskSettings["horizontalSeparatorsWidth"]);
       svg.appendChild(lineSeparator);
@@ -3090,45 +3150,45 @@
         const optionsDiv = document.getElementById("inputArea");
         const inputs = optionsDiv.querySelectorAll("input, select, textarea");
         inputs.forEach(input => {
-            if (settings.hasOwnProperty(input.id)) {
-                if (input.type === "checkbox") {
-                    input.checked = settings[input.id]; // Load boolean for checkboxes
-                } else if (input.type === "number") {
-                    input.value = parseFloat(settings[input.id]); // Load number for number inputs
-                } else if (input.tagName.toLowerCase() === "select") {
-                  const selectValue = settings[input.id];                  
-                  // Multi-select "taskIdSelector" dropdown re-create options and temporary assignement to false
-                  if (input.name = "taskIdSelector" && Array.isArray(selectValue)) {
-                    const taskIdSelector = document.getElementById("taskIdSelector");
-                    while (taskIdSelector.options.length > 0) {
-                      taskIdSelector.remove(0);
-                    }
-                    const tasksSettings = settings.tasksSettings;
-                    const taskIds = Object.keys(tasksSettings);
-                    taskIds.forEach(taskId => {
-                      const optionControl = document.createElement("option");
-                      optionControl.value = taskId;
-                      optionControl.textContent = taskId;
-                      optionControl.id = "task.id" + taskId;
-                      optionControl.selected = false;
-                      taskIdSelector.appendChild(optionControl);
-                    });
-                    // Multi-select dropdown
-                  } else if (input.multiple && Array.isArray(selectValue)) {
-                    Array.from(input.options).forEach(option => {
-                          option.selected = selectValue.includes(option.value);
-                    });
-                  } else {
-                    // Single-select dropdown
-                    const matchingOption = Array.from(input.options).find(option => option.value === selectValue);
-                    if (matchingOption) {
-                      input.value = selectValue;
-                    }
-                  }
-                } else {
-                    input.value = settings[input.id]; // Load string for text, date, and textarea
+          if (settings.hasOwnProperty(input.id)) {
+            if (input.type === "checkbox") {
+              input.checked = settings[input.id]; // Load boolean for checkboxes
+            } else if (input.type === "number") {
+              input.value = parseFloat(settings[input.id]); // Load number for number inputs
+            } else if (input.tagName.toLowerCase() === "select") {
+              const selectValue = settings[input.id];                  
+              // Multi-select "taskIdSelector" dropdown re-create options and temporary assignement to false
+              if (input.name = "taskIdSelector" && Array.isArray(selectValue)) {
+                const taskIdSelector = document.getElementById("taskIdSelector");
+                while (taskIdSelector.options.length > 0) {
+                  taskIdSelector.remove(0);
                 }
+                const tasksSettings = settings.tasksSettings;
+                const taskIds = Object.keys(tasksSettings);
+                taskIds.forEach(taskId => {
+                  const optionControl = document.createElement("option");
+                  optionControl.value = taskId;
+                  optionControl.textContent = taskId;
+                  optionControl.id = "task.id" + taskId;
+                  optionControl.selected = false;
+                  taskIdSelector.appendChild(optionControl);
+                });
+                // Multi-select dropdown
+                } else if (input.multiple && Array.isArray(selectValue)) {
+                  Array.from(input.options).forEach(option => {
+                        option.selected = selectValue.includes(option.value);
+                  });
+                } else {
+                  // Single-select dropdown
+                  const matchingOption = Array.from(input.options).find(option => option.value === selectValue);
+                  if (matchingOption) {
+                    input.value = selectValue;
+                  }
+                }
+            } else {
+              input.value = settings[input.id]; // Load string for text, date, and textarea
             }
+          }
         });
         // Restore nonWorkingConfig if present
         if (settings.nonWorkingConfig) {
@@ -3354,6 +3414,9 @@
     const parentsCharStyle = document.getElementById("parentsCharStyle").value;
     const parentsCharWeight = document.getElementById("parentsCharWeight").value;
     const parentsCharColor = document.getElementById("parentsCharColor").value;
+    const parentBarHeight = parseInt(document.getElementById("parentBarHeight").value);
+    const parentBarSpace = parseInt(document.getElementById("parentBarSpace").value);
+
 
     const delayCharSize = parseInt(document.getElementById("delayCharSize").value);
     const delayCharFamily = document.getElementById("delayCharFamily").value;
@@ -3463,6 +3526,8 @@
       parentsCharStyle,
       parentsCharWeight,
       parentsCharColor,
+      parentBarHeight,
+      parentBarSpace,
       delayCharSize,
       delayCharFamily,
       delayCharStyle,
