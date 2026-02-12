@@ -463,7 +463,7 @@
 
     <!-- Show detailed tasks info line 0-->
     <label for="tasksDetailedInfo_0" title="Show detailed additional task information">Percent Complete & Resources:</label>
-    <input type="checkbox" id="tasksDetailedInfo_0" onclick="generateGanttChart(event)" />
+    <input type="checkbox" id="tasksDetailedInfo_0" checked onclick="generateGanttChart(event)" />
 
     <!-- Show detailed tasks info line 1-->
     <label for="tasksDetailedInfo_1" title="Show detailed additional task information">Durations:</label>
@@ -1193,6 +1193,7 @@
           parentId: cols[5] ? parseInt(cols[5], 10) : 0,
           resources: cols[6] ? cols[6] : "",
           elapsed: 0,
+          actualElapsed: 0,
           totalFloat: 0,
           critical: false,
           delay: false,
@@ -1251,7 +1252,8 @@
       const maxDate = new Date(Math.max(...allDates));
       const projectElapsed = (maxDate - minDate) / oneDayMs;
       // Set Total Floats, Critical Tasks 
-      reversedTasks.forEach(task => {
+      sortedTasksByDepth = [...reversedTasks].sort((a, b) => b.depth - a.depth);
+      sortedTasksByDepth.forEach(task => {
         // Set Total Float
         task.totalFloat = (task.latestStartDate.getTime() - task.earliestStartDate.getTime()) / 24 / 60 / 60 / 1000;
         // Find all paths of each task and evaluate their durations
@@ -1271,15 +1273,18 @@
             });
           }
         });
-        // Set Ideal Percentage, Delay, Milestones
+        // Set Actual Elapsed, Ideal Percentage, Delay, Milestones
         task.milestone = (task.duration === 0);
-        const actualElapsed = Math.max(0, Math.min((today - task.startDate) / oneDayMs, task.elapsed)); // Clamp to [0, totalDuration]
-        task.idealPercentComplete = task.elapsed > 0 ? (actualElapsed / task.elapsed) * 100 : 0;
-        if (task.milestone && today >= task.startDate) task.idealPercentComplete = 100;
-        task.delay = task.percentComplete < task.idealPercentComplete;
+        task.actualElapsed = Math.max(0, Math.min((today - task.startDate) / oneDayMs, task.elapsed));
+        task.idealPercentComplete = task.elapsed > 0 ? (task.actualElapsed / task.elapsed) * 100 : 0;
+        // If you want ideal percent complete based only on parent elapsed not on children ideal percent complete, 
+        // then delete the following line of code
+        if (task.parent) task.idealPercentComplete = getParentIdealPercentComplete(task, sortedTasksByDepth, today);
+        if ((task.milestone || task.duration === 1) && today >= task.startDate) task.idealPercentComplete = 100;
+        task.delay = Math.floor(task.percentComplete) < Math.floor(task.idealPercentComplete);
       });
       //Rollback tasks to original order
-      reversedTasks.sort((a, b) => a.originalIndex - b.originalIndex);
+      reversedTasks = [...sortedTasksByDepth].sort((a, b) => a.originalIndex - b.originalIndex);
       //Remove the originalIndex property
       reversedTasks.forEach(task => {
         delete task.originalIndex;
@@ -1450,7 +1455,8 @@
       // Process from deepest to shallowest
       const sorted = [...tasks].sort((a, b) => b.depth - a.depth);
       for (const task of sorted) {
-        const children = getAllDescendants(tasks, task);
+        //const children = getAllDescendants(tasks, task);
+        const children = tasks.filter(t => t.parentId === task.id);
         if (children.length === 0) continue;
         if (task.predecessors[0])
           alertWithConfirmation(`Invalid predecessors in parent task. Task ${task.id} - ${task.name} - is a parent task and cannot have predecessors.`);
@@ -1515,6 +1521,41 @@
         }
         task.parent = true; // We are in a parent task 
       }
+    }
+
+    function getParentIdealPercentComplete(parentTask, tasks, today) {
+      const children = tasks.filter(t => t.parentId === parentTask.id);
+      if (children.length === 0) return 0;
+      let totalDuration = 0;
+      let weightedIdealPercentComplete = 0;
+      let milestoneCount = 0;
+      let completedMilestones = 0;
+      for (const child of children) {
+        const duration = parseFloat(child.duration) || 0;
+        const percent = parseFloat(child.idealPercentComplete) || 0;
+        if (duration > 0) {
+          // Normal task → duration-weighted
+          totalDuration += duration;
+          weightedIdealPercentComplete += percent * duration;
+        } else {
+          // Milestone
+          milestoneCount++;
+          if (percent === 100) {
+            completedMilestones++;
+          }
+        }
+      }
+      let parentIdealPercentComplete = 0;
+      if (totalDuration > 0) {
+        parentIdealPercentComplete =
+          Math.round((weightedIdealPercentComplete / totalDuration) * 10) / 10;
+      } else if (milestoneCount > 0) {
+        parentIdealPercentComplete =
+          Math.round((completedMilestones / milestoneCount) * 100 * 10) / 10;
+      } else {
+        parentIdealPercentComplete = 0;
+      }
+      return parentIdealPercentComplete;
     }
 
     function checkParentTasksForElapsedAndDurationAndDates(tasks1, tasks2) {
@@ -1762,6 +1803,7 @@
           "endDate: "+task.endDate+"\n"+
           "predecessors: "+task.predecessors.map(p => String(p.id) + " " + String(p.dependencyType) + " " + String(p.leadLag))+"\n"+
           "elapsed: "+task.elapsed+"\n"+
+          "actualElapsed: "+task.actualElapsed+"\n"+
           "totalFloat: "+task.totalFloat+"\n"+
           "parent task: "+task.parent+"\n"+
           "parent task id: "+task.parentId+"\n"+
@@ -1778,7 +1820,7 @@
   }
 
   function toCSV(tasks, datesFormat) {
-    CSV = "Id, Name, Duration, Percent Complete, Predecessors, Parent Id, Depth, Elapsed Duration, Total Float, Ideal Percent Complete, Earlier Start Date, Earliest Finish Date, Latest Start Date, Latest Finish Date, Start Date, Finish Date, Resources, Parent, Critical, Delay, Milestone\n";
+    CSV = "Id, Name, Duration, Percent Complete, Predecessors, Parent Id, Depth, Elapsed Duration, Actual Elapsed Duration, Total Float, Ideal Percent Complete, Earlier Start Date, Earliest Finish Date, Latest Start Date, Latest Finish Date, Start Date, Finish Date, Resources, Parent, Critical, Delay, Milestone\n";
     tasks.forEach(task => {
         CSV = CSV + 
           String(task.id)+","+
@@ -1789,6 +1831,7 @@
           String(task.parentId)+","+
           String(task.depth)+","+
           String(task.elapsed)+","+
+          String(task.actualElapsed)+","+
           String(task.totalFloat)+","+
           String(task.idealPercentComplete)+","+
           String(formatDate(task.earliestStartDate, datesFormat))+","+
@@ -2290,7 +2333,7 @@
         tasksTitleDetailed.setAttribute("font-style", headerDatesCharStyle);
         tasksTitleDetailed.setAttribute("font-weight", headerDatesCharWeight);
         tasksTitleDetailed.setAttribute("fill", headerDatesCharColor);
-        tasksTitleDetailed.textContent = `Duration, Elapsed, Total Float`;
+        tasksTitleDetailed.textContent = `Duration, Elapsed, Actual Elapsed, Total Float`;
         svg.appendChild(tasksTitleDetailed);
       }
 
@@ -2386,6 +2429,7 @@
                           "name: "+task.name+"\n"+
                           "duration: "+task.duration+"\n"+
                           "elapsed: "+task.elapsed+"\n"+
+                          "actual elapsed: "+task.actualElapsed+"\n"+
                           "percent complete: "+task.percentComplete+"\n"+
                           "ideal percent complete: "+task.idealPercentComplete+"\n"+
                           "earliest start date: "+formatDate(task.earliestStartDate,datesFormat)+"\n"+
@@ -2617,7 +2661,7 @@
              detailedText.setAttribute("font-style", taskSettings["delayCharStyle"]);
            }
          }
-         detailedText.textContent = `${task.duration}, ${task.elapsed}, ${task.totalFloat}`;
+         detailedText.textContent = `${task.duration}, ${task.elapsed}, ${task.actualElapsed}, ${task.totalFloat}`;
          const titleNameText = document.createElementNS(svgNS, "title");
          titleNameText.textContent = taskDetails; 
          detailedText.appendChild(titleNameText);
