@@ -9,4 +9,4 @@ or
 
 click here to use the latest version on my github page: [EasyGantt web app](https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.3.txt.html)
 
-This is the latest version of the main feature description summary: [EasyGantt doc](https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.2_FeaturesDescription.pdf)
+This is the latest version of the datasheet: [EasyGantt doc](https://giampaolomarucci.github.io/easygantt/EasyGantt_v2.0.3-datasheet.html)
