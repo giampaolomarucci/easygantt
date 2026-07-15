@@ -1,0 +1,457 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 28px 20px 60px;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    border-bottom: 2px solid #3b82d4;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #57606a;
+    margin-bottom: 24px;
+  }
+  h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #3b82d4;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 14px;
+    margin-top: 22px;
+    margin-bottom: 10px;
+  }
+  h3 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 14px;
+    margin-bottom: 4px;
+    color: #1f2328;
+  }
+  .page-break {
+    border: none;
+    border-top: 2px dashed #e5e7eb;
+    margin: 32px 0;
+  }
+  .page-label {
+    font-size: 10px;
+    color: #57606a;
+    text-align: right;
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  thead th {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    padding: 6px 8px;
+    text-align: left;
+    font-weight: 700;
+    color: #1f2328;
+  }
+  tbody td {
+    border: 1px solid #e5e7eb;
+    padding: 5px 8px;
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) td { background: #f7f8fa; }
+  .tag {
+    display: inline-block;
+    background: #f0f4fb;
+    border: 1px solid #c3d4ef;
+    color: #3b82d4;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-right: 3px;
+  }
+  .tag.green  { background: #edfaf1; border-color: #a2d9b1; color: #1a7f37; }
+  .tag.orange { background: #fff5ec; border-color: #f0c08a; color: #b25000; }
+  .tag.purple { background: #f5f0ff; border-color: #cbbfef; color: #6e40c9; }
+  .tag.gray   { background: #f7f8fa; border-color: #c9d1d9; color: #57606a; }
+  ul { padding-left: 18px; margin-top: 4px; }
+  li { margin-bottom: 3px; }
+  p { margin-top: 6px; }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+  }
+  .kv-block {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-top: 8px;
+  }
+  .kv-block .row { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 12px; }
+  .kv-block .row .k { color: #57606a; }
+  .kv-block .row .v { font-weight: 600; text-align: right; }
+  footer {
+    max-width: 760px;
+    margin: 40px auto 0;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 10px;
+    text-align: center;
+    font-size: 11px;
+    color: #57606a;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="page-label">Page 1 of 3</div>
+
+  <h1>Easy Gantt v2.0.3 — Feature Datasheet</h1>
+  <p class="subtitle">Author: Giampaolo Marucci  ·  Single-file HTML + SVG Gantt chart creator  ·  Rev. 15 Jul 2026</p>
+
+  
+  <h2>1 · Overview &amp; Architecture</h2>
+  <p>
+    Easy Gantt is a self-contained, zero-dependency, single-file HTML application (≈ 4 200 lines).
+    All scheduling logic, rendering, and user-interface code is written in vanilla JavaScript.
+    The chart output is an inline SVG element that is regenerated on every user interaction.
+    The application is designed to run entirely in the browser — no server, no build step.
+  </p>
+
+  <div class="kv-block">
+    <div class="row"><span class="k">Delivery format</span><span class="v">Single .html file</span></div>
+    <div class="row"><span class="k">Dependencies</span><span class="v">None (pure vanilla JS + SVG)</span></div>
+    <div class="row"><span class="k">Output format</span><span class="v">Inline SVG (scalable, exportable)</span></div>
+    <div class="row"><span class="k">Persistence formats</span><span class="v">JSON project file, CSV export, SVG export</span></div>
+    <div class="row"><span class="k">Responsive scaling</span><span class="v">CSS + JS <code>transform: scale()</code> fitted to viewport</span></div>
+    <div class="row"><span class="k">Edit surface</span><span class="v">Plain-text CSV textarea + tabbed option panels + inline SVG form fields</span></div>
+  </div>
+
+  
+  <h2>2 · Task Input Format</h2>
+  <p>Tasks are entered as comma-separated or tab-separated rows in a textarea.
+     The separator is auto-detected from the first row.</p>
+
+  <table>
+    <thead>
+      <tr><th>Column #</th><th>Field</th><th>Type / Format</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Id</td><td>Integer</td><td>Unique task identifier; must not be 0</td></tr>
+      <tr><td>2</td><td>Name</td><td>String</td><td>Displayed left of the bar; truncated to configurable char limit</td></tr>
+      <tr><td>3</td><td>Duration</td><td>Integer (working days) or "N days"</td><td>0 = milestone; parsed with optional "days" suffix</td></tr>
+      <tr><td>4</td><td>Percent Complete</td><td>Float 0–100 or 0–1 (with ×100 flag)</td><td>Optional multiplier checkbox converts 0–1 range to 0–100</td></tr>
+      <tr><td>5</td><td>Predecessors</td><td>Semicolon-separated list</td><td>Each entry: <code>ID[TYPE][+/-LAG]</code> — see dependency types below</td></tr>
+      <tr><td>6</td><td>Parent Id</td><td>Integer or 0</td><td>0 or blank = root level; creates hierarchy / WBS indentation</td></tr>
+      <tr><td>7</td><td>Resources</td><td>String</td><td>Free-form; shown in task label and searchable by keyword filter</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>3 · Dependency / Relationship Types</h2>
+  <p>
+    The predecessor parser (regex-based) supports all four standard PDM relationship types,
+    each optionally qualified with a signed integer lead/lag expressed in working days.
+  </p>
+
+  <table>
+    <thead><tr><th>Type</th><th>Syntax example</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag">FS</span> (default)</td><td><code>3FS-1</code></td><td>Finish-to-Start: successor starts after predecessor finishes (− 1 day lead)</td></tr>
+      <tr><td><span class="tag">SS</span></td><td><code>2SS+2</code></td><td>Start-to-Start: successor starts after predecessor starts (+ 2 days lag)</td></tr>
+      <tr><td><span class="tag">FF</span></td><td><code>4FF+1</code></td><td>Finish-to-Finish: successor finishes after predecessor finishes</td></tr>
+      <tr><td><span class="tag">SF</span></td><td><code>1SF</code></td><td>Start-to-Finish: successor finishes after predecessor starts</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:8px;font-size:11px;color:#57606a">
+    Multiple predecessors are separated by semicolons.
+    Lead/lag values skip non-working days when the working-day calendar is enabled.
+  </p>
+
+  
+  <h2>4 · Scheduling Engine — Critical Path Method (CPM)</h2>
+
+  <h3>4.1 Algorithm Steps</h3>
+  <ul>
+    <li><strong>Topological sort</strong> (Kahn's BFS algorithm) to establish a valid processing order.</li>
+    <li><strong>Forward pass</strong> — computes Earliest Start Date (ESD) and Earliest Finish Date (EFD) for every task, respecting all four PDM dependency types and lead/lag values, skipping non-working days.</li>
+    <li><strong>Backward pass</strong> — computes Latest Start Date (LSD) and Latest Finish Date (LFD) working backwards from project end.</li>
+    <li><strong>Parent task adaptation</strong> — parent tasks derive their dates, elapsed, duration, and weighted % complete from their children (deepest-first). The whole cycle repeats until convergence (max 10 iterations) to handle chains of nested parents.</li>
+    <li><strong>Total Float calculation</strong> — <code>TF = LSD − ESD</code> in calendar days.</li>
+    <li><strong>Critical path identification</strong> — tasks are marked critical when TF = 0 <em>and</em> they lie on the longest path through the project (via recursive path-finding).</li>
+  </ul>
+
+  <h3>4.2 Computed Task Attributes</h3>
+  <div class="two-col">
+    <ul>
+      <li>Earliest / Latest Start &amp; Finish Dates</li>
+      <li>Elapsed calendar days (vs. working days)</li>
+      <li>Actual elapsed (capped to today)</li>
+      <li>Ideal percent complete</li>
+    </ul>
+    <ul>
+      <li>Total float</li>
+      <li>Critical flag</li>
+      <li>Delay flag (actual % &lt; ideal %)</li>
+      <li>Milestone flag (duration = 0)</li>
+    </ul>
+  </div>
+
+  
+  <h2>5 · Working-Day Calendar</h2>
+  <p>
+    A configurable non-working calendar is applied consistently throughout the CPM passes
+    and lead/lag calculations. Settings are stored in <code>window.NonWorkingDatesConfig</code>
+    and persist across JSON save/load cycles.
+  </p>
+  <ul>
+    <li>Toggle Saturday and/or Sunday as non-working.</li>
+    <li>Define any number of non-working date <em>periods</em> (from–to ranges).</li>
+    <li>Individual non-working dates are pre-expanded from periods and stored as a sorted array of ISO strings for O(1) daily lookup.</li>
+    <li>Project start date is automatically advanced to the next working day if it falls on a non-working day.</li>
+  </ul>
+
+  
+  <hr class="page-break" />
+  <div class="page-label">Page 2 of 3</div>
+
+  
+  <h2>6 · Data Validation &amp; Error Handling</h2>
+  <table>
+    <thead><tr><th>Check</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td>Self-referential predecessor</td><td>Alert shown; scheduling continues</td></tr>
+      <tr><td>Self-referential parent ID</td><td>Alert shown; scheduling continues</td></tr>
+      <tr><td>Non-numeric task ID</td><td>ID replaced with <code>+Infinity</code> to avoid halt</td></tr>
+      <tr><td>Circular dependency (direct or transitive)</td><td>BFS detection; alert shown per offending task</td></tr>
+      <tr><td>Predecessor referencing non-existent task</td><td>Alert shown; timestamp excluded from forward pass</td></tr>
+      <tr><td>Parent task with predecessors</td><td>Alert shown (parent tasks derive dates from children)</td></tr>
+      <tr><td>Ancestor-violating predecessor in Edit Mode</td><td>Predecessor silently rejected; reason shown in alert</td></tr>
+      <tr><td>Empty CSV input</td><td>Returns empty task array; SVG container cleared</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:6px;font-size:11px;color:#57606a">
+    All alerts use a confirmable <code>alertWithConfirmation()</code> wrapper that lets the user
+    suppress subsequent alerts in the same rendering cycle.
+  </p>
+
+  
+  <h2>7 · SVG Chart Rendering</h2>
+
+  <h3>7.1 Chart Structure</h3>
+  <ul>
+    <li><strong>Legend</strong> — auto-generated colour key at the top of the SVG.</li>
+    <li><strong>Header timeline</strong> — date labels spaced by a configurable minimum pixel gap to prevent overlap; vertical grid lines at every unique task start date.</li>
+    <li><strong>Today line</strong> — vertical marker (solid or dashed, configurable colour &amp; width) shown only when today falls within the chart's date range.</li>
+    <li><strong>Horizontal axes</strong> — horizontal timeline bar + vertical Y-axis bar, both configurable.</li>
+    <li><strong>Task rows</strong> — one horizontal band per task, separated by thin configurable lines.</li>
+  </ul>
+
+  <h3>7.2 Bar Types</h3>
+  <table>
+    <thead><tr><th>Type</th><th>Shape</th><th>Distinguishing behaviour</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Normal child task</td>
+        <td>Rounded-corner rectangle</td>
+        <td>Split into "% not complete" and "% complete" layers; optional red critical-path centre stripe</td>
+      </tr>
+      <tr>
+        <td>Parent / summary task</td>
+        <td>Rectangle (separate height/space/colour)</td>
+        <td>Same dual-layer split; configurable rounding, height, and spacing differ from children</td>
+      </tr>
+      <tr>
+        <td>Milestone</td>
+        <td>Rotated square (rhombus / diamond)</td>
+        <td>Colour reflects completion; date label shown to the right</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 Dependency Arrows</h3>
+  <p>
+    SVG <code>&lt;path&gt;</code> elements are drawn for every declared predecessor relationship.
+    The routing algorithm adjusts the elbow path geometry per relationship type (FS, SS, FF, SF)
+    so arrows connect the semantically correct anchor points (end→start, start→start, etc.).
+    An SVG marker (filled arrowhead) is attached to each path end.
+    Lines are independently configurable per task: colour, width, solid/dashed.
+  </p>
+
+  <h3>7.4 Tooltip Details on Hover</h3>
+  <p>
+    Every bar, milestone, and task label embeds an SVG <code>&lt;title&gt;</code> element
+    containing a full data summary: id, name, duration, elapsed, actual elapsed, all four
+    CPM dates, % complete, ideal %, float, critical/delay/milestone/parent flags, depth,
+    predecessor list, and resources.
+  </p>
+
+  
+  <h2>8 · Appearance Configuration (Tabbed Panels)</h2>
+  <p>Nine tab panels expose fine-grained styling parameters. All changes re-render the chart immediately.</p>
+
+  <table>
+    <thead><tr><th>Tab</th><th>Controls exposed</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Project</strong></td><td>Project start date, today's date, % complete ×100 toggle, non-working calendar popup</td></tr>
+      <tr><td><strong>Header</strong></td><td>Date format (5 options), font size/family/style/weight/colour, vertical spacing, minimum date distance</td></tr>
+      <tr><td><strong>Chart</strong></td><td>Total width, left/right margins, Y-axis zero, X-axis zero, axes colour &amp; width, timeline colour &amp; width, horizontal separator colour &amp; width, today-line colour/width/dash, three optional detail info rows</td></tr>
+      <tr><td><strong>Tasks</strong></td><td>Child &amp; parent &amp; delay label: font size/family/style/weight/colour; X &amp; Y alignment, name truncation length</td></tr>
+      <tr><td><strong>Bars</strong></td><td>Child &amp; parent bar height, spacing, % complete colour, % not complete colour, border colour &amp; thickness, corner radius</td></tr>
+      <tr><td><strong>Dates</strong></td><td>Date label format, font size/family/style/weight/colour, left/right offset from bar edges</td></tr>
+      <tr><td><strong>Criticals</strong></td><td>Critical stripe colour and width</td></tr>
+      <tr><td><strong>Dependencies</strong></td><td>Arrow colour, width, solid/dashed style</td></tr>
+      <tr><td><strong>Filters</strong></td><td>See Section 9 below</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.1 Per-Task Settings Store</h3>
+  <p>
+    A global <code>TasksSettings</code> singleton holds a settings map keyed by task ID.
+    Changes made via the tabbed panels are applied only to the tasks selected in the
+    multi-select <em>Task Selector</em> control (supports Ctrl/Shift multi-selection).
+    This enables per-task visual overrides independent of the global defaults.
+    Settings are serialised into the JSON project file and restored on load.
+  </p>
+
+  
+  <hr class="page-break" />
+  <div class="page-label">Page 3 of 3</div>
+
+  
+  <h2>9 · Filtering System</h2>
+  <p>
+    Filters are applied at render time so the underlying task data is never mutated.
+    Multiple filters compose (AND logic applied sequentially).
+    Each filter category offers a positive and a negative toggle; activating both is a no-op.
+  </p>
+
+  <table>
+    <thead><tr><th>Filter</th><th>Positive</th><th>Negative</th></tr></thead>
+    <tbody>
+      <tr><td>Parent type</td><td>Show only parent tasks</td><td>Show only leaf tasks</td></tr>
+      <tr><td>Delay status</td><td>Show only delayed tasks</td><td>Show only on-time tasks</td></tr>
+      <tr><td>Critical path</td><td>Show only critical tasks</td><td>Show only non-critical tasks</td></tr>
+      <tr><td>Milestone type</td><td>Show only milestones</td><td>Show only non-milestones</td></tr>
+      <tr><td>Start status</td><td>Show only started tasks (start ≤ today)</td><td>Show only future tasks</td></tr>
+      <tr><td>Completion</td><td>Show only 100% complete tasks</td><td>Show only incomplete tasks</td></tr>
+      <tr><td>Selector match</td><td>Show only tasks selected in the Task Selector</td><td>Show only unselected tasks</td></tr>
+      <tr><td>Keyword search</td><td colspan="2">Free text: matches task name, resources, exact task ID, or predecessor ID (case-insensitive)</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>10 · File Input / Output</h2>
+
+  <table>
+    <thead><tr><th>Action</th><th>Format</th><th>API used</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Save JSON</strong></td>
+        <td>JSON</td>
+        <td><code>showSaveFilePicker</code></td>
+        <td>Serialises all HTML control values, non-working calendar config, and full per-task settings store</td>
+      </tr>
+      <tr>
+        <td><strong>Open JSON</strong></td>
+        <td>JSON</td>
+        <td><code>&lt;input type=file&gt;</code></td>
+        <td>Restores all controls and task settings; backwards-compatible with older JSON files lacking <code>tasksSettings</code></td>
+      </tr>
+      <tr>
+        <td><strong>Save SVG</strong></td>
+        <td>SVG</td>
+        <td><code>showSaveFilePicker</code></td>
+        <td>Clones the live SVG, sets <code>viewBox</code>, removes inline styles; falls back to <code>&lt;a download&gt;</code> if File System Access API unavailable</td>
+      </tr>
+      <tr>
+        <td><strong>Save CSV</strong></td>
+        <td>CSV</td>
+        <td><code>showSaveFilePicker</code></td>
+        <td>Exports all computed task attributes (22 columns) including CPM dates, float, flags, and hierarchy depth</td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2>11 · Interactive Edit Mode</h2>
+  <p>
+    When the <em>Edit Mode</em> checkbox is active, the task-label area of each SVG bar is
+    replaced by a row of inline <code>&lt;foreignObject&gt;</code> input fields rendered inside the SVG.
+    Editing any field triggers immediate CSV synchronisation and chart regeneration.
+  </p>
+
+  <h3>Editable fields per task row</h3>
+  <ul>
+    <li><strong>Id</strong> (read-only in the form)</li>
+    <li><strong>Name</strong> — indented by WBS depth for visual hierarchy</li>
+    <li><strong>Duration</strong> — validated ≥ 0</li>
+    <li><strong>% Complete</strong> — validated ≥ 0</li>
+    <li><strong>Predecessors</strong> — validated against circular-dependency rules before acceptance; rejected IDs shown in alert</li>
+    <li><strong>Resources</strong> — free text</li>
+  </ul>
+
+  <h3>Edit Mode toolbar buttons</h3>
+  <table>
+    <thead><tr><th>Button</th><th>Function</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Create Task</strong></td><td>Inserts a blank task immediately after the selected task; new ID = max existing ID + 1; inherits parent ID from context</td></tr>
+      <tr><td><strong>Delete Tasks</strong></td><td>Deletes selected tasks plus all their descendants (recursive); cleans orphan predecessor references from remaining tasks</td></tr>
+      <tr><td><strong>Indent Tasks</strong></td><td>Promotes selected tasks one level deeper by assigning the nearest eligible task above as the new parent; validates post-indent ancestor constraints and removes now-invalid predecessors</td></tr>
+      <tr><td><strong>Outdent Tasks</strong></td><td>Moves selected tasks one level up (grandparent becomes parent); reorders the CSV block accordingly; removes predecessors that would become invalid after the move</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>12 · Responsive Scaling &amp; Multi-device Support</h2>
+  <p>
+    A <code>unifiedScale()</code> function calculates a uniform CSS <code>transform: scale()</code>
+    factor based on <code>window.innerWidth / 800</code> and <code>window.innerHeight / 600</code>,
+    taking the minimum (aspect-ratio-preserving) scale.
+    This is applied to the entire layout wrapper on page load and on every <code>resize</code> event,
+    making the tool usable on tablets and small laptop screens without horizontal scrolling.
+  </p>
+
+  
+  <h2>13 · Feature Summary</h2>
+
+  <table>
+    <thead><tr><th>Feature Area</th><th>Capability tags</th></tr></thead>
+    <tbody>
+      <tr><td>Scheduling engine</td><td><span class="tag green">CPM forward pass</span> <span class="tag green">CPM backward pass</span> <span class="tag green">Critical path</span> <span class="tag green">Total float</span> <span class="tag green">Delay detection</span></td></tr>
+      <tr><td>Relationship types</td><td><span class="tag">FS</span> <span class="tag">SS</span> <span class="tag">FF</span> <span class="tag">SF</span> <span class="tag orange">Lead/Lag</span></td></tr>
+      <tr><td>Hierarchy</td><td><span class="tag purple">Parent / WBS</span> <span class="tag purple">Unlimited depth</span> <span class="tag purple">Weighted % complete</span></td></tr>
+      <tr><td>Calendar</td><td><span class="tag">Saturday off</span> <span class="tag">Sunday off</span> <span class="tag">Date ranges</span></td></tr>
+      <tr><td>Visualisation</td><td><span class="tag green">SVG bars</span> <span class="tag green">Milestones</span> <span class="tag green">Dependency arrows</span> <span class="tag green">Today line</span> <span class="tag green">Legend</span></td></tr>
+      <tr><td>Filtering</td><td><span class="tag orange">8 filter dimensions</span> <span class="tag orange">Keyword search</span> <span class="tag orange">Positive + negative</span></td></tr>
+      <tr><td>Editing</td><td><span class="tag purple">Inline SVG fields</span> <span class="tag purple">CRUD tasks</span> <span class="tag purple">Indent/Outdent</span></td></tr>
+      <tr><td>Persistence</td><td><span class="tag gray">JSON project</span> <span class="tag gray">CSV export</span> <span class="tag gray">SVG export</span></td></tr>
+      <tr><td>Appearance</td><td><span class="tag gray">Per-task overrides</span> <span class="tag gray">9 font families</span> <span class="tag gray">12+ colours</span> <span class="tag gray">5 date formats</span></td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<footer>Giampaolo Marucci</footer>
+</body>
+</html>
